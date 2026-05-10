@@ -443,11 +443,10 @@
   async function fetchPrice(ticker, index) {
     if (!ticker) return;
     const priceEl = document.getElementById(`price-${index}`);
+
+    // Use Finnhub without custom headers to avoid CORS preflight
     try {
-      const res  = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`, {
-        headers: { 'X-Finnhub-Token': FINNHUB_KEY }
-      });
-      if (!res.ok) throw new Error('Finnhub failed');
+      const res  = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`);
       const data = await res.json();
       if (data && data.c && data.c > 0) {
         rows[index].price = data.c.toString();
@@ -460,30 +459,8 @@
         saveData();
         const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         document.getElementById('last-updated').textContent = 'Updated ' + t;
-        return;
       }
     } catch(e) {}
-    // Fallback: Yahoo Finance via allorigins proxy
-    try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-      const res2 = await fetch(proxy);
-      const raw  = await res2.json();
-      const json = JSON.parse(raw.contents);
-      const price = json?.chart?.result?.[0]?.meta?.regularMarketPrice;
-      if (price && price > 0) {
-        rows[index].price = price.toString();
-        if (priceEl) {
-          priceEl.value = price.toFixed(2);
-          priceEl.classList.add('live');
-          setTimeout(() => priceEl.classList.remove('live'), 2000);
-        }
-        recalc();
-        saveData();
-        const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('last-updated').textContent = 'Updated ' + t;
-      }
-    } catch(e2) {}
   }
 
   window.refreshAllPrices = async function() {
