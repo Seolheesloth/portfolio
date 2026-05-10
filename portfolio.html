@@ -231,7 +231,8 @@
     { ticker: '',     price: '', shares1: ''   },
   ];
 
-  let rows = [];
+  window.rows = [];
+  let rows = window.rows;
   let fetchTimer = {};
   let saveTimer  = null;
   let isLoading  = false;
@@ -369,6 +370,23 @@
     document.getElementById('acct3-allocated').textContent = fmt$(alloc3);
   };
 
+  // ── Row update helpers (accessible from inline handlers) ──
+  window.updateTicker = function(i, val) {
+    rows[i].ticker = val.toUpperCase();
+    document.getElementById('ticker-'+i).value = val.toUpperCase();
+    saveData();
+  };
+  window.updatePrice = function(i, val) {
+    rows[i].price = val;
+    recalc();
+    saveData();
+  };
+  window.updateShares = function(i, val) {
+    rows[i].shares1 = val;
+    recalc();
+    saveData();
+  };
+
   // ── Render rows ──
   window.renderRows = function() {
     document.querySelectorAll('.row-stock').forEach(r => r.remove());
@@ -381,7 +399,7 @@
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
             <input class="ticker-input" type="text" placeholder="TICKER" maxlength="6"
               id="ticker-${i}" value="${r.ticker}" style="margin-bottom:0;"
-              oninput="rows[${i}].ticker=this.value.toUpperCase();this.value=this.value.toUpperCase();saveData()"
+              oninput="updateTicker(${i},this.value)"
               onblur="onTickerBlur(${i})">
             <button onclick="deleteRow(${i})" style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;background:none;border:none;color:#ccc;cursor:pointer;padding:0 0 0 4px;" onmouseover="this.style.color='#b83232'" onmouseout="this.style.color='#ccc'">×</button>
           </div>
@@ -389,13 +407,13 @@
             <span class="price-sym">$</span>
             <input class="price-input" type="number" placeholder="0.00" step="0.01"
               id="price-${i}" value="${r.price}"
-              oninput="rows[${i}].price=this.value;recalc();saveData()">
+              oninput="updatePrice(${i},this.value)">
           </div>
         </td>
         <td class="c-acct1">
           <input class="shares-input" type="number" placeholder="# shares" step="0.001"
             value="${r.shares1}"
-            oninput="rows[${i}].shares1=this.value;recalc();saveData()">
+            oninput="updateShares(${i},this.value)">
           <div class="cell-sub">
             <span id="sub1-${i}">—</span>
             <span class="badge badge-blue" id="pct1-${i}"></span>
