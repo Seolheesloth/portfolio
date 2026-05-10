@@ -13,18 +13,20 @@
   .page-header { max-width: 1100px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
   .page-title { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
   .page-subtitle { font-size: 12px; color: #777; }
+  .sync-status { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 4px; }
+  .sync-status.synced  { background: #edf7f2; color: #1a7a4a; }
+  .sync-status.saving  { background: #fff8e0; color: #8a6a00; }
+  .sync-status.error   { background: #fdedf0; color: #b83232; }
 
   table { max-width: 1100px; width: 100%; margin: 0 auto; border-collapse: collapse; border: 1.5px solid #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 3px 3px 0 rgba(0,0,0,0.07); }
   col.c-ticker { width: 130px; }
 
-  /* Header */
   .row-header th { padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; border-bottom: 1.5px solid #1a1a1a; text-align: left; }
   .row-header .c-ticker { background: #1a1a1a; border-right: 1.5px solid #1a1a1a; }
   .row-header .c-acct1  { background: #1a3fa8; border-right: 1px solid rgba(255,255,255,0.2); }
   .row-header .c-acct2  { background: #1a7a4a; border-right: 1px solid rgba(255,255,255,0.2); }
   .row-header .c-acct3  { background: #7a1a6a; }
 
-  /* Summary */
   .row-summary td { border-bottom: 1.5px solid #1a1a1a; padding: 14px; vertical-align: middle; }
   .row-summary .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
   .row-summary .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
@@ -49,7 +51,6 @@
   .s-note.purple span { color: #7a1a6a; }
   .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
 
-  /* Stock rows */
   .row-stock td { border-bottom: 1px solid #e8e8e8; padding: 10px 14px; vertical-align: middle; }
   .row-stock .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
   .row-stock .c-acct1  { background: #fff;    border-right: 1px solid #e8e8e8; }
@@ -80,7 +81,6 @@
   .result-shares.purple { color: #7a1a6a; }
   .result-shares.empty  { font-size: 12px; font-weight: 400; color: #bbb; }
 
-  /* Cash row */
   .row-cash td { border-bottom: 1.5px solid #1a1a1a; padding: 10px 14px; vertical-align: middle; }
   .row-cash .c-ticker { background: #fffbea; border-right: 1.5px solid #1a1a1a; }
   .row-cash .c-acct1  { background: #fffbea; border-right: 1px solid #e8dfa0; }
@@ -90,7 +90,6 @@
   .cash-input:focus { border-bottom-color: #8a7a00; }
   .cash-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
 
-  /* Footer */
   .row-footer td { padding: 10px 14px; vertical-align: middle; }
   .row-footer .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
   .row-footer .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
@@ -99,29 +98,12 @@
 
   .btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; border: 1.5px solid #1a1a1a; border-radius: 6px; padding: 6px 14px; cursor: pointer; background: white; color: #111; transition: all 0.15s; }
   .btn:hover { background: #1a1a1a; color: white; }
-  .btn-danger  { border-color: #b83232; color: #b83232; }
-  .btn-danger:hover  { background: #b83232; color: white; }
   .btn-sort    { border-color: #555; color: #555; }
   .btn-sort:hover    { background: #555; color: white; }
   .btn-refresh { border-color: #1a7a4a; color: #1a7a4a; }
   .btn-refresh:hover { background: #1a7a4a; color: white; }
 
-  .header-input {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #fff;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255,255,255,0.3);
-    outline: none;
-    width: 100%;
-    padding: 1px 0;
-    cursor: text;
-  }
-  .header-input::placeholder { color: rgba(255,255,255,0.5); }
+  .header-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.3); outline: none; width: 100%; padding: 1px 0; cursor: text; }
 
   @media (max-width: 700px) {
     col.c-ticker { width: 90px; }
@@ -134,7 +116,8 @@
 
 <div class="page-header">
   <div class="page-title">// PORTFOLIO RATIO CALC</div>
-  <div class="page-subtitle">US Equities · Live prices · Auto-saved</div>
+  <div class="page-subtitle">US Equities · Live prices · Cloud sync</div>
+  <div class="sync-status synced" id="sync-status">✓ Synced</div>
 </div>
 
 <table>
@@ -153,8 +136,6 @@
     </tr>
   </thead>
   <tbody>
-
-    <!-- SUMMARY ROW -->
     <tr class="row-summary">
       <td class="c-ticker">
         <div style="font-size:11px;color:#aaa;font-family:monospace">—</div>
@@ -183,7 +164,6 @@
       </td>
     </tr>
 
-    <!-- CASH ROW -->
     <tr class="row-cash" id="cash-row">
       <td class="c-ticker">
         <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#7a6000;margin-bottom:3px;">CASH</div>
@@ -201,36 +181,46 @@
       </td>
       <td class="c-acct2">
         <div class="result-shares green empty" id="cash2-amount">Enter budget →</div>
-        <div class="cell-sub">
-          <span class="badge badge-green" id="cash2-pct"></span>
-        </div>
+        <div class="cell-sub"><span class="badge badge-green" id="cash2-pct"></span></div>
       </td>
       <td class="c-acct3">
         <div class="result-shares purple empty" id="cash3-amount">Enter budget →</div>
-        <div class="cell-sub">
-          <span class="badge badge-purple" id="cash3-pct"></span>
-        </div>
+        <div class="cell-sub"><span class="badge badge-purple" id="cash3-pct"></span></div>
       </td>
     </tr>
 
-    <!-- FOOTER ROW -->
     <tr class="row-footer">
       <td class="c-ticker">
         <button class="btn" onclick="addRow()">+ Add</button>
       </td>
-      <td class="c-acct1">
-        <button class="btn btn-danger" onclick="removeLastRow()">− Remove</button>
-      </td>
+      <td class="c-acct1"></td>
       <td class="c-acct2">
         <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ Refresh Prices</button>
       </td>
       <td class="c-acct3"></td>
     </tr>
-
   </tbody>
 </table>
 
-<script>
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwUS9-uzZtmXzeIC-dDKcPJvrSbndL7L8",
+    authDomain: "portfolio-e7706.firebaseapp.com",
+    databaseURL: "https://portfolio-e7706-default-rtdb.firebaseio.com",
+    projectId: "portfolio-e7706",
+    storageBucket: "portfolio-e7706.firebasestorage.app",
+    messagingSenderId: "256442360821",
+    appId: "1:256442360821:web:cba2f574b3099da79936bc"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+  const DB_REF = ref(db, 'portfolio');
+
   const FINNHUB_KEY = 'd803iupr01qj3ct8tn40d803iupr01qj3ct8tn4g';
 
   const DEFAULT_ROWS = [
@@ -243,37 +233,60 @@
 
   let rows = [];
   let fetchTimer = {};
+  let saveTimer  = null;
+  let isLoading  = false;
 
-  function saveData() {
-    try {
-      localStorage.setItem('pf_rows',        JSON.stringify(rows));
-      localStorage.setItem('pf_budget2',     document.getElementById('acct2-budget').value);
-      localStorage.setItem('pf_budget3',     document.getElementById('acct3-budget').value);
-      localStorage.setItem('pf_cash1',       document.getElementById('cash1').value);
-      localStorage.setItem('pf_h1',          document.getElementById('h-acct1').value);
-      localStorage.setItem('pf_h2',          document.getElementById('h-acct2').value);
-      localStorage.setItem('pf_h3',          document.getElementById('h-acct3').value);
-    } catch(e) {}
+  function setSyncStatus(status) {
+    const el = document.getElementById('sync-status');
+    el.className = 'sync-status ' + status;
+    el.textContent = status === 'synced' ? '✓ Synced' : status === 'saving' ? '↑ Saving...' : '✕ Error';
   }
 
-  function loadData() {
-    try {
-      const r  = localStorage.getItem('pf_rows');
-      const b2 = localStorage.getItem('pf_budget2');
-      const b3 = localStorage.getItem('pf_budget3');
-      const c  = localStorage.getItem('pf_cash1');
-      rows = r ? JSON.parse(r) : DEFAULT_ROWS.map(x => ({...x}));
-      if (b2) document.getElementById('acct2-budget').value = b2;
-      if (b3) document.getElementById('acct3-budget').value = b3;
-      if (c)  document.getElementById('cash1').value = c;
-      const h1 = localStorage.getItem('pf_h1'); if (h1) document.getElementById('h-acct1').value = h1;
-      const h2 = localStorage.getItem('pf_h2'); if (h2) document.getElementById('h-acct2').value = h2;
-      const h3 = localStorage.getItem('pf_h3'); if (h3) document.getElementById('h-acct3').value = h3;
-    } catch(e) {
+  // ── Save to Firebase (debounced) ──
+  window.saveData = function() {
+    clearTimeout(saveTimer);
+    setSyncStatus('saving');
+    saveTimer = setTimeout(async () => {
+      try {
+        const data = {
+          rows,
+          budget2: document.getElementById('acct2-budget').value,
+          budget3: document.getElementById('acct3-budget').value,
+          cash1:   document.getElementById('cash1').value,
+          h1:      document.getElementById('h-acct1').value,
+          h2:      document.getElementById('h-acct2').value,
+          h3:      document.getElementById('h-acct3').value,
+        };
+        await set(DB_REF, data);
+        setSyncStatus('synced');
+      } catch(e) {
+        setSyncStatus('error');
+      }
+    }, 800);
+  };
+
+  // ── Load from Firebase (realtime) ──
+  onValue(DB_REF, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) {
       rows = DEFAULT_ROWS.map(x => ({...x}));
+      renderRows();
+      return;
     }
-  }
+    isLoading = true;
+    rows = data.rows || DEFAULT_ROWS.map(x => ({...x}));
+    if (data.budget2) document.getElementById('acct2-budget').value = data.budget2;
+    if (data.budget3) document.getElementById('acct3-budget').value = data.budget3;
+    if (data.cash1)   document.getElementById('cash1').value = data.cash1;
+    if (data.h1)      document.getElementById('h-acct1').value = data.h1;
+    if (data.h2)      document.getElementById('h-acct2').value = data.h2;
+    if (data.h3)      document.getElementById('h-acct3').value = data.h3;
+    isLoading = false;
+    renderRows();
+    setSyncStatus('synced');
+  });
 
+  // ── Formatting ──
   function fmt$(n) {
     const num = parseFloat(n);
     if (isNaN(num)) return '—';
@@ -285,121 +298,81 @@
       const v = parseFloat(r.price) * parseFloat(r.shares1);
       return s + (isNaN(v) ? 0 : v);
     }, 0);
-    const cash = parseFloat(document.getElementById('cash1').value) || 0;
-    return stockTotal + cash;
+    return stockTotal + (parseFloat(document.getElementById('cash1').value) || 0);
   }
 
-  function calcTarget(pct, budget, price) {
-    if (budget <= 0 || price <= 0 || pct <= 0) return null;
-    return (pct * budget) / price;
-  }
-
-  function recalc() {
+  // ── Recalc ──
+  window.recalc = function() {
     const total1  = getTotal1();
     const budget2 = parseFloat(document.getElementById('acct2-budget').value) || 0;
     const budget3 = parseFloat(document.getElementById('acct3-budget').value) || 0;
     document.getElementById('acct1-total').textContent = fmt$(total1);
-
-    let allocated2 = 0;
-    let allocated3 = 0;
+    let alloc2 = 0, alloc3 = 0;
 
     rows.forEach((r, i) => {
-      const price   = parseFloat(r.price);
-      const shares1 = parseFloat(r.shares1);
-      const val1    = isNaN(price * shares1) ? 0 : price * shares1;
-      const pct     = total1 > 0 ? val1 / total1 : 0;
+      const price = parseFloat(r.price), shares1 = parseFloat(r.shares1);
+      const val1  = isNaN(price * shares1) ? 0 : price * shares1;
+      const pct   = total1 > 0 ? val1 / total1 : 0;
 
-      // Acct1
       const sub1 = document.getElementById(`sub1-${i}`);
       const pct1 = document.getElementById(`pct1-${i}`);
       if (sub1) sub1.textContent = val1 > 0 ? fmt$(val1) : '—';
       if (pct1) pct1.textContent = (total1 > 0 && val1 > 0) ? (pct*100).toFixed(1)+'%' : '';
 
-      // Acct2
-      const res2 = document.getElementById(`res2-${i}`);
-      const sub2 = document.getElementById(`sub2-${i}`);
-      const pct2 = document.getElementById(`pct2-${i}`);
-      if (res2) {
-        const shs2 = calcTarget(pct, budget2, price);
-        if (shs2 !== null) {
-          allocated2 += pct * budget2;
-          res2.className = 'result-shares green';
-          res2.innerHTML = `${shs2.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
-          if (sub2) sub2.textContent = fmt$(pct * budget2);
-          if (pct2) pct2.textContent = (pct*100).toFixed(1)+'%';
+      ['2','3'].forEach(n => {
+        const budget = n === '2' ? budget2 : budget3;
+        const res  = document.getElementById(`res${n}-${i}`);
+        const sub  = document.getElementById(`sub${n}-${i}`);
+        const pctEl= document.getElementById(`pct${n}-${i}`);
+        if (!res) return;
+        if (budget > 0 && price > 0 && pct > 0) {
+          const tv  = pct * budget;
+          const shs = tv / price;
+          if (n === '2') alloc2 += tv; else alloc3 += tv;
+          res.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
+          res.innerHTML = `${shs.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
+          if (sub)   sub.textContent  = fmt$(tv);
+          if (pctEl) pctEl.textContent= (pct*100).toFixed(1)+'%';
         } else {
-          res2.className = 'result-shares empty';
-          res2.textContent = budget2 > 0 ? '—' : 'Enter budget →';
-          if (sub2) sub2.textContent = '';
-          if (pct2) pct2.textContent = '';
+          res.className = 'result-shares empty';
+          res.textContent = budget > 0 ? '—' : 'Enter budget →';
+          if (sub)   sub.textContent  = '';
+          if (pctEl) pctEl.textContent= '';
         }
-      }
-
-      // Acct3
-      const res3 = document.getElementById(`res3-${i}`);
-      const sub3 = document.getElementById(`sub3-${i}`);
-      const pct3 = document.getElementById(`pct3-${i}`);
-      if (res3) {
-        const shs3 = calcTarget(pct, budget3, price);
-        if (shs3 !== null) {
-          allocated3 += pct * budget3;
-          res3.className = 'result-shares purple';
-          res3.innerHTML = `${shs3.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
-          if (sub3) sub3.textContent = fmt$(pct * budget3);
-          if (pct3) pct3.textContent = (pct*100).toFixed(1)+'%';
-        } else {
-          res3.className = 'result-shares empty';
-          res3.textContent = budget3 > 0 ? '—' : 'Enter budget →';
-          if (sub3) sub3.textContent = '';
-          if (pct3) pct3.textContent = '';
-        }
-      }
+      });
     });
 
     // Cash
-    const cash1Val = parseFloat(document.getElementById('cash1').value) || 0;
-    const cashPct  = total1 > 0 ? cash1Val / total1 : 0;
-    document.getElementById('cash1-sub').textContent = cash1Val > 0 ? fmt$(cash1Val) : '—';
-    document.getElementById('cash1-pct').textContent = (cash1Val > 0 && total1 > 0) ? (cashPct*100).toFixed(1)+'%' : '';
+    const cv   = parseFloat(document.getElementById('cash1').value) || 0;
+    const cpct = total1 > 0 ? cv / total1 : 0;
+    document.getElementById('cash1-sub').textContent = cv > 0 ? fmt$(cv) : '—';
+    document.getElementById('cash1-pct').textContent = (cv > 0 && total1 > 0) ? (cpct*100).toFixed(1)+'%' : '';
 
-    // Cash acct2
-    const cash2Amt = document.getElementById('cash2-amount');
-    const cash2Pct = document.getElementById('cash2-pct');
-    if (budget2 > 0 && cashPct > 0) {
-      const t = cashPct * budget2;
-      allocated2 += t;
-      cash2Amt.className = 'result-shares green';
-      cash2Amt.textContent = fmt$(t);
-      cash2Pct.textContent = (cashPct*100).toFixed(1)+'%';
-    } else {
-      cash2Amt.className = 'result-shares empty';
-      cash2Amt.textContent = budget2 > 0 ? '—' : 'Enter budget →';
-      cash2Pct.textContent = '';
-    }
+    ['2','3'].forEach(n => {
+      const budget = n === '2' ? budget2 : budget3;
+      const amtEl  = document.getElementById(`cash${n}-amount`);
+      const pctEl  = document.getElementById(`cash${n}-pct`);
+      if (budget > 0 && cpct > 0) {
+        const t = cpct * budget;
+        if (n === '2') alloc2 += t; else alloc3 += t;
+        amtEl.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
+        amtEl.textContent = fmt$(t);
+        pctEl.textContent = (cpct*100).toFixed(1)+'%';
+      } else {
+        amtEl.className = 'result-shares empty';
+        amtEl.textContent = budget > 0 ? '—' : 'Enter budget →';
+        pctEl.textContent = '';
+      }
+    });
 
-    // Cash acct3
-    const cash3Amt = document.getElementById('cash3-amount');
-    const cash3Pct = document.getElementById('cash3-pct');
-    if (budget3 > 0 && cashPct > 0) {
-      const t = cashPct * budget3;
-      allocated3 += t;
-      cash3Amt.className = 'result-shares purple';
-      cash3Amt.textContent = fmt$(t);
-      cash3Pct.textContent = (cashPct*100).toFixed(1)+'%';
-    } else {
-      cash3Amt.className = 'result-shares empty';
-      cash3Amt.textContent = budget3 > 0 ? '—' : 'Enter budget →';
-      cash3Pct.textContent = '';
-    }
+    document.getElementById('acct2-allocated').textContent = fmt$(alloc2);
+    document.getElementById('acct3-allocated').textContent = fmt$(alloc3);
+  };
 
-    document.getElementById('acct2-allocated').textContent = fmt$(allocated2);
-    document.getElementById('acct3-allocated').textContent = fmt$(allocated3);
-  }
-
-  function renderRows() {
+  // ── Render rows ──
+  window.renderRows = function() {
     document.querySelectorAll('.row-stock').forEach(r => r.remove());
     const cashRow = document.getElementById('cash-row');
-
     rows.forEach((r, i) => {
       const tr = document.createElement('tr');
       tr.className = 'row-stock';
@@ -410,7 +383,7 @@
               id="ticker-${i}" value="${r.ticker}" style="margin-bottom:0;"
               oninput="rows[${i}].ticker=this.value.toUpperCase();this.value=this.value.toUpperCase();saveData()"
               onblur="onTickerBlur(${i})">
-            <button onclick="deleteRow(${i})" style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;background:none;border:none;color:#ccc;cursor:pointer;padding:0 0 0 4px;line-height:1;" onmouseover="this.style.color='#b83232'" onmouseout="this.style.color='#ccc'">×</button>
+            <button onclick="deleteRow(${i})" style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;background:none;border:none;color:#ccc;cursor:pointer;padding:0 0 0 4px;" onmouseover="this.style.color='#b83232'" onmouseout="this.style.color='#ccc'">×</button>
           </div>
           <div class="price-wrap">
             <span class="price-sym">$</span>
@@ -445,15 +418,18 @@
       `;
       cashRow.insertAdjacentElement('beforebegin', tr);
     });
-
     recalc();
-  }
+  };
 
+  // ── Price fetching ──
   async function fetchPrice(ticker, index) {
     if (!ticker) return;
     const priceEl = document.getElementById(`price-${index}`);
     try {
-      const res  = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`);
+      const res  = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`, {
+        headers: { 'X-Finnhub-Token': FINNHUB_KEY }
+      });
+      if (!res.ok) throw new Error('Finnhub failed');
       const data = await res.json();
       if (data && data.c && data.c > 0) {
         rows[index].price = data.c.toString();
@@ -464,31 +440,49 @@
         }
         recalc();
         saveData();
-        updateTimestamp();
+        const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('last-updated').textContent = 'Updated ' + t;
+        return;
       }
     } catch(e) {}
+    // Fallback: Yahoo Finance via allorigins proxy
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res2 = await fetch(proxy);
+      const raw  = await res2.json();
+      const json = JSON.parse(raw.contents);
+      const price = json?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if (price && price > 0) {
+        rows[index].price = price.toString();
+        if (priceEl) {
+          priceEl.value = price.toFixed(2);
+          priceEl.classList.add('live');
+          setTimeout(() => priceEl.classList.remove('live'), 2000);
+        }
+        recalc();
+        saveData();
+        const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('last-updated').textContent = 'Updated ' + t;
+      }
+    } catch(e2) {}
   }
 
-  function updateTimestamp() {
-    const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('last-updated').textContent = 'Updated ' + t;
-  }
-
-  async function refreshAllPrices() {
+  window.refreshAllPrices = async function() {
     for (let i = 0; i < rows.length; i++) {
       if (rows[i].ticker) await fetchPrice(rows[i].ticker, i);
     }
-  }
+  };
 
-  function onTickerBlur(i) {
+  window.onTickerBlur = function(i) {
     const ticker = rows[i].ticker;
     if (ticker) {
       clearTimeout(fetchTimer[i]);
       fetchTimer[i] = setTimeout(() => fetchPrice(ticker, i), 300);
     }
-  }
+  };
 
-  function sortAlpha() {
+  window.sortAlpha = function() {
     rows.sort((a, b) => {
       if (!a.ticker && !b.ticker) return 0;
       if (!a.ticker) return 1;
@@ -497,33 +491,17 @@
     });
     renderRows();
     saveData();
-  }
+  };
 
-  function deleteRow(i) {
-    if (rows.length > 1) {
-      rows.splice(i, 1);
-      renderRows();
-      saveData();
-    }
-  }
+  window.deleteRow = function(i) {
+    if (rows.length > 1) { rows.splice(i, 1); renderRows(); saveData(); }
+  };
 
-  function addRow() {
+  window.addRow = function() {
     rows.push({ ticker: '', price: '', shares1: '' });
     renderRows();
     saveData();
-  }
-
-  function removeLastRow() {
-    if (rows.length > 1) {
-      rows.pop();
-      renderRows();
-      saveData();
-    }
-  }
-
-  loadData();
-  renderRows();
-  setTimeout(refreshAllPrices, 600);
+  };
 </script>
 </body>
 </html>
