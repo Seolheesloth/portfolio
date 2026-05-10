@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Ratio Calc</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ffffff; }
+  body { color: #111; font-family: 'IBM Plex Sans', sans-serif; padding: 28px 16px 60px; }
+
+  .page-header { max-width: 860px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .page-title { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  .page-subtitle { font-size: 12px; color: #777; }
+
+  table { max-width: 860px; width: 100%; margin: 0 auto; border-collapse: collapse; border: 1.5px solid #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 3px 3px 0 rgba(0,0,0,0.07); }
+  col.c-ticker { width: 140px; }
+
+  .row-header th { padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; border-bottom: 1.5px solid #1a1a1a; text-align: left; }
+  .row-header .c-ticker { background: #1a1a1a; border-right: 1.5px solid #1a1a1a; }
+  .row-header .c-acct1  { background: #1a3fa8; border-right: 1px solid rgba(255,255,255,0.2); }
+  .row-header .c-acct2  { background: #1a7a4a; }
+
+  .row-summary td { border-bottom: 1.5px solid #1a1a1a; padding: 14px; vertical-align: middle; }
+  .row-summary .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
+  .row-summary .c-acct1  { background: #fff; border-right: 1px solid #ddd; }
+  .row-summary .c-acct2  { background: #f2faf6; }
+
+  .s-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .s-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+  .s-value.blue { color: #1a3fa8; }
+  .s-value.green { color: #1a7a4a; }
+  .budget-wrap { display: flex; align-items: center; gap: 1px; }
+  .budget-dollar { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #1a7a4a; }
+  #acct2-budget { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #1a7a4a; background: transparent; border: none; outline: none; width: 100%; padding: 0; }
+  #acct2-budget::placeholder { color: #a0c8b8; font-weight: 400; font-size: 17px; }
+  .s-note { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-top: 5px; }
+  .s-note span { color: #1a7a4a; }
+
+  .row-stock td { border-bottom: 1px solid #e8e8e8; padding: 10px 14px; vertical-align: middle; }
+  .row-stock .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
+  .row-stock .c-acct1  { background: #fff; border-right: 1px solid #e8e8e8; }
+  .row-stock .c-acct2  { background: #f2faf6; }
+
+  .ticker-input { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; background: transparent; border: none; outline: none; color: #111; width: 100%; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .ticker-input::placeholder { color: #ccc; font-weight: 400; text-transform: none; }
+  .price-wrap { display: flex; align-items: center; gap: 3px; }
+  .price-sym { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #999; }
+  .price-input { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #888; background: transparent; border: none; border-bottom: 1px dashed #ccc; outline: none; width: 100%; padding: 1px 0; }
+  .price-input::placeholder { color: #ccc; }
+  .price-input:focus { border-bottom-color: #1a3fa8; color: #111; }
+
+  .shares-input { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; background: transparent; border: none; border-bottom: 1.5px solid transparent; outline: none; color: #111; width: 100%; padding: 1px 0; display: block; margin-bottom: 4px; }
+  .shares-input:focus { border-bottom-color: #1a3fa8; }
+  .shares-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
+
+  .cell-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #888; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .badge { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .badge-blue  { background: #edf1fb; color: #1a3fa8; }
+  .badge-green { background: #edf7f2; color: #1a7a4a; }
+
+  .result-shares { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; color: #1a7a4a; display: block; margin-bottom: 4px; }
+  .result-shares.empty { font-size: 12px; font-weight: 400; color: #bbb; }
+  .frac { font-size: 11px; font-weight: 400; color: #888; }
+
+  .row-footer td { padding: 10px 14px; border-top: 1.5px solid #1a1a1a; vertical-align: middle; }
+  .row-footer .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
+  .row-footer .c-acct1  { background: #fff; border-right: 1px solid #ddd; }
+  .row-footer .c-acct2  { background: #f2faf6; }
+
+  .btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; border: 1.5px solid #1a1a1a; border-radius: 6px; padding: 6px 14px; cursor: pointer; background: white; color: #111; transition: all 0.15s; }
+  .btn:hover { background: #1a1a1a; color: white; }
+  .btn-danger { border-color: #b83232; color: #b83232; }
+  .btn-danger:hover { background: #b83232; color: white; }
+  .footer-note { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #1a7a4a; line-height: 1.6; }
+
+  @media (max-width: 500px) {
+    col.c-ticker { width: 110px; }
+    .s-value, .budget-dollar, #acct2-budget { font-size: 17px; }
+    .result-shares { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">// PORTFOLIO RATIO CALC</div>
+  <div class="page-subtitle">US Equities · Dollar-based · Auto-saved</div>
+</div>
+
+<table>
+  <colgroup>
+    <col class="c-ticker">
+    <col class="c-acct1">
+    <col class="c-acct2">
+  </colgroup>
+  <thead>
+    <tr class="row-header">
+      <th class="c-ticker">Ticker</th>
+      <th class="c-acct1">Account 1 — Reference</th>
+      <th class="c-acct2">Account 2 — Target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row-summary">
+      <td class="c-ticker"><div style="font-size:11px;color:#aaa;font-family:monospace">—</div></td>
+      <td class="c-acct1">
+        <div class="s-label">Total Value</div>
+        <div class="s-value blue" id="acct1-total">$0.00</div>
+      </td>
+      <td class="c-acct2">
+        <div class="s-label">Target Budget</div>
+        <div class="budget-wrap">
+          <span class="budget-dollar">$</span>
+          <input type="number" id="acct2-budget" placeholder="10000" oninput="recalc();saveData()">
+        </div>
+        <div class="s-note">Allocated: <span id="acct2-allocated">$0.00</span></div>
+      </td>
+    </tr>
+    <tr id="rows-anchor"></tr>
+    <tr class="row-footer">
+      <td class="c-ticker"><button class="btn" onclick="addRow()">+ Add</button></td>
+      <td class="c-acct1"><button class="btn btn-danger" onclick="removeLastRow()">− Remove</button></td>
+      <td class="c-acct2"><div class="footer-note">✓ Auto-saved</div></td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  const DEFAULT_ROWS = [
+    { ticker: 'AAPL', price: '189.30', shares1: '10' },
+    { ticker: 'NVDA', price: '875.00', shares1: '5'  },
+    { ticker: 'MSFT', price: '415.50', shares1: '8'  },
+    { ticker: 'TSLA', price: '175.20', shares1: '15' },
+    { ticker: '',     price: '',       shares1: ''    },
+  ];
+
+  let rows = [];
+
+  function saveData() {
+    localStorage.setItem('pf_rows', JSON.stringify(rows));
+    localStorage.setItem('pf_budget', document.getElementById('acct2-budget').value);
+  }
+
+  function loadData() {
+    try {
+      const r = localStorage.getItem('pf_rows');
+      const b = localStorage.getItem('pf_budget');
+      rows = r ? JSON.parse(r) : DEFAULT_ROWS.map(x => ({...x}));
+      if (b) document.getElementById('acct2-budget').value = b;
+    } catch(e) {
+      rows = DEFAULT_ROWS.map(x => ({...x}));
+    }
+  }
+
+  function fmt$(n) {
+    const num = parseFloat(n);
+    if (isNaN(num)) return '—';
+    return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function getTotal1() {
+    return rows.reduce((s, r) => {
+      const v = parseFloat(r.price) * parseFloat(r.shares1);
+      return s + (isNaN(v) ? 0 : v);
+    }, 0);
+  }
+
+  function recalc() {
+    const total1 = getTotal1();
+    document.getElementById('acct1-total').textContent = fmt$(total1);
+    const budget = parseFloat(document.getElementById('acct2-budget').value) || 0;
+    let allocated = 0;
+
+    rows.forEach((r, i) => {
+      const price   = parseFloat(r.price);
+      const shares1 = parseFloat(r.shares1);
+      const val1    = isNaN(price * shares1) ? 0 : price * shares1;
+      const pct     = total1 > 0 ? val1 / total1 : 0;
+
+      const sub1 = document.getElementById(`sub1-${i}`);
+      const pct1 = document.getElementById(`pct1-${i}`);
+      if (sub1) sub1.textContent = val1 > 0 ? fmt$(val1) : '—';
+      if (pct1) pct1.textContent = (total1 > 0 && val1 > 0) ? (pct*100).toFixed(1)+'%' : '';
+
+      const res  = document.getElementById(`res-${i}`);
+      const sub2 = document.getElementById(`sub2-${i}`);
+      const pct2 = document.getElementById(`pct2-${i}`);
+      if (!res) return;
+
+      if (budget > 0 && price > 0 && pct > 0) {
+        const targetVal    = pct * budget;
+        const sharesNeeded = targetVal / price;
+        const whole = Math.floor(sharesNeeded);
+        const frac  = sharesNeeded - whole;
+        const fracStr = frac > 0.005 ? `<span class="frac"> +${frac.toFixed(3).slice(1)}</span>` : '';
+        allocated += targetVal;
+        res.className = 'result-shares';
+        res.innerHTML = `${whole.toLocaleString()}${fracStr} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
+        if (sub2) sub2.textContent = fmt$(targetVal);
+        if (pct2) pct2.textContent = (pct*100).toFixed(1)+'%';
+      } else {
+        res.className = 'result-shares empty';
+        res.textContent = budget > 0 ? '—' : 'Enter budget →';
+        if (sub2) sub2.textContent = '';
+        if (pct2) pct2.textContent = '';
+      }
+    });
+
+    document.getElementById('acct2-allocated').textContent = fmt$(allocated);
+  }
+
+  function renderRows() {
+    document.querySelectorAll('.row-stock').forEach(r => r.remove());
+    const anchor = document.getElementById('rows-anchor');
+
+    rows.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.className = 'row-stock';
+      tr.innerHTML = `
+        <td class="c-ticker">
+          <input class="ticker-input" type="text" placeholder="TICKER" maxlength="6"
+            value="${r.ticker}"
+            oninput="rows[${i}].ticker=this.value.toUpperCase();this.value=this.value.toUpperCase();saveData()">
+          <div class="price-wrap">
+            <span class="price-sym">$</span>
+            <input class="price-input" type="number" placeholder="0.00" step="0.01"
+              value="${r.price}"
+              oninput="rows[${i}].price=this.value;recalc();saveData()">
+          </div>
+        </td>
+        <td class="c-acct1">
+          <input class="shares-input" type="number" placeholder="# shares" step="0.001"
+            value="${r.shares1}"
+            oninput="rows[${i}].shares1=this.value;recalc();saveData()">
+          <div class="cell-sub">
+            <span id="sub1-${i}">—</span>
+            <span class="badge badge-blue" id="pct1-${i}"></span>
+          </div>
+        </td>
+        <td class="c-acct2">
+          <span class="result-shares empty" id="res-${i}">Enter budget →</span>
+          <div class="cell-sub">
+            <span id="sub2-${i}"></span>
+            <span class="badge badge-green" id="pct2-${i}"></span>
+          </div>
+        </td>
+      `;
+      anchor.insertAdjacentElement('beforebegin', tr);
+    });
+
+    recalc();
+  }
+
+  function addRow() {
+    rows.push({ ticker: '', price: '', shares1: '' });
+    renderRows();
+    saveData();
+  }
+
+  function removeLastRow() {
+    if (rows.length > 1) { rows.pop(); renderRows(); saveData(); }
+  }
+
+  loadData();
+  renderRows();
+</script>
+</body>
+</html>
