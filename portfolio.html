@@ -10,40 +10,51 @@
   html, body { background: #ffffff; }
   body { color: #111; font-family: 'IBM Plex Sans', sans-serif; padding: 28px 16px 60px; }
 
-  .page-header { max-width: 860px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .page-header { max-width: 1100px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
   .page-title { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
   .page-subtitle { font-size: 12px; color: #777; }
 
-  table { max-width: 860px; width: 100%; margin: 0 auto; border-collapse: collapse; border: 1.5px solid #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 3px 3px 0 rgba(0,0,0,0.07); }
-  col.c-ticker { width: 140px; }
+  table { max-width: 1100px; width: 100%; margin: 0 auto; border-collapse: collapse; border: 1.5px solid #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 3px 3px 0 rgba(0,0,0,0.07); }
+  col.c-ticker { width: 130px; }
 
+  /* Header */
   .row-header th { padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; border-bottom: 1.5px solid #1a1a1a; text-align: left; }
   .row-header .c-ticker { background: #1a1a1a; border-right: 1.5px solid #1a1a1a; }
   .row-header .c-acct1  { background: #1a3fa8; border-right: 1px solid rgba(255,255,255,0.2); }
-  .row-header .c-acct2  { background: #1a7a4a; }
+  .row-header .c-acct2  { background: #1a7a4a; border-right: 1px solid rgba(255,255,255,0.2); }
+  .row-header .c-acct3  { background: #7a1a6a; }
 
+  /* Summary */
   .row-summary td { border-bottom: 1.5px solid #1a1a1a; padding: 14px; vertical-align: middle; }
   .row-summary .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
-  .row-summary .c-acct1  { background: #fff; border-right: 1px solid #ddd; }
-  .row-summary .c-acct2  { background: #f2faf6; }
+  .row-summary .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
+  .row-summary .c-acct2  { background: #f2faf6; border-right: 1px solid #ddd; }
+  .row-summary .c-acct3  { background: #faf2f9; }
 
   .s-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
-  .s-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
-  .s-value.blue  { color: #1a3fa8; }
-  .s-value.green { color: #1a7a4a; }
+  .s-value { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+  .s-value.blue   { color: #1a3fa8; }
+  .s-value.green  { color: #1a7a4a; }
+  .s-value.purple { color: #7a1a6a; }
   .budget-wrap { display: flex; align-items: center; gap: 1px; }
-  .budget-dollar { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #1a7a4a; }
-  #acct2-budget { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #1a7a4a; background: transparent; border: none; outline: none; width: 100%; padding: 0; }
-  #acct2-budget::placeholder { color: #a0c8b8; font-weight: 400; font-size: 17px; }
+  .budget-dollar-green  { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #1a7a4a; }
+  .budget-dollar-purple { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #7a1a6a; }
+  .budget-input { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; background: transparent; border: none; outline: none; width: 100%; padding: 0; }
+  .budget-input.green  { color: #1a7a4a; }
+  .budget-input.purple { color: #7a1a6a; }
+  .budget-input.green::placeholder  { color: #a0c8b8; font-weight: 400; font-size: 16px; }
+  .budget-input.purple::placeholder { color: #c8a0c4; font-weight: 400; font-size: 16px; }
   .s-note { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-top: 5px; }
-  .s-note span { color: #1a7a4a; }
+  .s-note.green  span { color: #1a7a4a; }
+  .s-note.purple span { color: #7a1a6a; }
   .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
 
   /* Stock rows */
   .row-stock td { border-bottom: 1px solid #e8e8e8; padding: 10px 14px; vertical-align: middle; }
   .row-stock .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
-  .row-stock .c-acct1  { background: #fff; border-right: 1px solid #e8e8e8; }
-  .row-stock .c-acct2  { background: #f2faf6; }
+  .row-stock .c-acct1  { background: #fff;    border-right: 1px solid #e8e8e8; }
+  .row-stock .c-acct2  { background: #f2faf6; border-right: 1px solid #e8e8e8; }
+  .row-stock .c-acct3  { background: #faf2f9; }
 
   .ticker-input { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; background: transparent; border: none; outline: none; color: #111; width: 100%; text-transform: uppercase; display: block; margin-bottom: 5px; }
   .ticker-input::placeholder { color: #ccc; font-weight: 400; text-transform: none; }
@@ -60,18 +71,21 @@
 
   .cell-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #888; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .badge { font-size: 13px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
-  .badge-blue  { background: #edf1fb; color: #1a3fa8; }
-  .badge-green { background: #edf7f2; color: #1a7a4a; }
+  .badge-blue   { background: #edf1fb; color: #1a3fa8; }
+  .badge-green  { background: #edf7f2; color: #1a7a4a; }
+  .badge-purple { background: #f7edf6; color: #7a1a6a; }
 
-  .result-shares { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; color: #1a7a4a; display: block; margin-bottom: 6px; }
-  .result-shares.empty { font-size: 12px; font-weight: 400; color: #bbb; }
-  .frac { font-size: 11px; font-weight: 400; color: #888; }
+  .result-shares { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; display: block; margin-bottom: 6px; }
+  .result-shares.green  { color: #1a7a4a; }
+  .result-shares.purple { color: #7a1a6a; }
+  .result-shares.empty  { font-size: 12px; font-weight: 400; color: #bbb; }
 
-  /* Cash row — same border style as stock rows but with thick bottom */
-  .row-cash td { border-bottom: 1.5px solid #1a1a1a; border-top: none; padding: 10px 14px; vertical-align: middle; }
+  /* Cash row */
+  .row-cash td { border-bottom: 1.5px solid #1a1a1a; padding: 10px 14px; vertical-align: middle; }
   .row-cash .c-ticker { background: #fffbea; border-right: 1.5px solid #1a1a1a; }
   .row-cash .c-acct1  { background: #fffbea; border-right: 1px solid #e8dfa0; }
-  .row-cash .c-acct2  { background: #f7f9ea; }
+  .row-cash .c-acct2  { background: #f4fbf0; border-right: 1px solid #e8e8e8; }
+  .row-cash .c-acct3  { background: #fbf0fa; }
   .cash-input { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; background: transparent; border: none; border-bottom: 1.5px solid transparent; outline: none; color: #111; width: 100%; padding: 1px 0; display: block; margin-bottom: 6px; }
   .cash-input:focus { border-bottom-color: #8a7a00; }
   .cash-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
@@ -79,8 +93,9 @@
   /* Footer */
   .row-footer td { padding: 10px 14px; vertical-align: middle; }
   .row-footer .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
-  .row-footer .c-acct1  { background: #fff; border-right: 1px solid #ddd; }
-  .row-footer .c-acct2  { background: #f2faf6; }
+  .row-footer .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
+  .row-footer .c-acct2  { background: #f2faf6; border-right: 1px solid #ddd; }
+  .row-footer .c-acct3  { background: #faf2f9; }
 
   .btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; border: 1.5px solid #1a1a1a; border-radius: 6px; padding: 6px 14px; cursor: pointer; background: white; color: #111; transition: all 0.15s; }
   .btn:hover { background: #1a1a1a; color: white; }
@@ -91,9 +106,26 @@
   .btn-refresh { border-color: #1a7a4a; color: #1a7a4a; }
   .btn-refresh:hover { background: #1a7a4a; color: white; }
 
-  @media (max-width: 500px) {
-    col.c-ticker { width: 110px; }
-    .s-value, .budget-dollar, #acct2-budget { font-size: 17px; }
+  .header-input {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    outline: none;
+    width: 100%;
+    padding: 1px 0;
+    cursor: text;
+  }
+  .header-input::placeholder { color: rgba(255,255,255,0.5); }
+
+  @media (max-width: 700px) {
+    col.c-ticker { width: 90px; }
+    .s-value { font-size: 15px; }
     .result-shares { font-size: 14px; }
   }
 </style>
@@ -110,15 +142,17 @@
     <col class="c-ticker">
     <col class="c-acct1">
     <col class="c-acct2">
+    <col class="c-acct3">
   </colgroup>
   <thead>
     <tr class="row-header">
       <th class="c-ticker">Ticker</th>
-      <th class="c-acct1">Account 1 — Reference</th>
-      <th class="c-acct2">Account 2 — Target</th>
+      <th class="c-acct1"><input class="header-input" id="h-acct1" value="Account 1 — Reference" oninput="saveData()"></th>
+      <th class="c-acct2"><input class="header-input" id="h-acct2" value="Account 2 — Target" oninput="saveData()"></th>
+      <th class="c-acct3"><input class="header-input" id="h-acct3" value="Account 3 — Target" oninput="saveData()"></th>
     </tr>
   </thead>
-  <tbody id="table-body">
+  <tbody>
 
     <!-- SUMMARY ROW -->
     <tr class="row-summary">
@@ -134,10 +168,18 @@
       <td class="c-acct2">
         <div class="s-label">Target Budget</div>
         <div class="budget-wrap">
-          <span class="budget-dollar">$</span>
-          <input type="number" id="acct2-budget" placeholder="10000" oninput="recalc();saveData()">
+          <span class="budget-dollar-green">$</span>
+          <input type="number" id="acct2-budget" class="budget-input green" placeholder="10000" oninput="recalc();saveData()">
         </div>
-        <div class="s-note">Allocated: <span id="acct2-allocated">$0.00</span></div>
+        <div class="s-note green">Allocated: <span id="acct2-allocated">$0.00</span></div>
+      </td>
+      <td class="c-acct3">
+        <div class="s-label">Target Budget</div>
+        <div class="budget-wrap">
+          <span class="budget-dollar-purple">$</span>
+          <input type="number" id="acct3-budget" class="budget-input purple" placeholder="10000" oninput="recalc();saveData()">
+        </div>
+        <div class="s-note purple">Allocated: <span id="acct3-allocated">$0.00</span></div>
       </td>
     </tr>
 
@@ -158,9 +200,15 @@
         </div>
       </td>
       <td class="c-acct2">
-        <div class="result-shares empty" id="cash2-amount">Enter budget →</div>
+        <div class="result-shares green empty" id="cash2-amount">Enter budget →</div>
         <div class="cell-sub">
           <span class="badge badge-green" id="cash2-pct"></span>
+        </div>
+      </td>
+      <td class="c-acct3">
+        <div class="result-shares purple empty" id="cash3-amount">Enter budget →</div>
+        <div class="cell-sub">
+          <span class="badge badge-purple" id="cash3-pct"></span>
         </div>
       </td>
     </tr>
@@ -176,6 +224,7 @@
       <td class="c-acct2">
         <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ Refresh Prices</button>
       </td>
+      <td class="c-acct3"></td>
     </tr>
 
   </tbody>
@@ -197,20 +246,29 @@
 
   function saveData() {
     try {
-      localStorage.setItem('pf_rows',   JSON.stringify(rows));
-      localStorage.setItem('pf_budget', document.getElementById('acct2-budget').value);
-      localStorage.setItem('pf_cash1',  document.getElementById('cash1').value);
+      localStorage.setItem('pf_rows',        JSON.stringify(rows));
+      localStorage.setItem('pf_budget2',     document.getElementById('acct2-budget').value);
+      localStorage.setItem('pf_budget3',     document.getElementById('acct3-budget').value);
+      localStorage.setItem('pf_cash1',       document.getElementById('cash1').value);
+      localStorage.setItem('pf_h1',          document.getElementById('h-acct1').value);
+      localStorage.setItem('pf_h2',          document.getElementById('h-acct2').value);
+      localStorage.setItem('pf_h3',          document.getElementById('h-acct3').value);
     } catch(e) {}
   }
 
   function loadData() {
     try {
-      const r = localStorage.getItem('pf_rows');
-      const b = localStorage.getItem('pf_budget');
-      const c = localStorage.getItem('pf_cash1');
+      const r  = localStorage.getItem('pf_rows');
+      const b2 = localStorage.getItem('pf_budget2');
+      const b3 = localStorage.getItem('pf_budget3');
+      const c  = localStorage.getItem('pf_cash1');
       rows = r ? JSON.parse(r) : DEFAULT_ROWS.map(x => ({...x}));
-      if (b) document.getElementById('acct2-budget').value = b;
-      if (c) document.getElementById('cash1').value = c;
+      if (b2) document.getElementById('acct2-budget').value = b2;
+      if (b3) document.getElementById('acct3-budget').value = b3;
+      if (c)  document.getElementById('cash1').value = c;
+      const h1 = localStorage.getItem('pf_h1'); if (h1) document.getElementById('h-acct1').value = h1;
+      const h2 = localStorage.getItem('pf_h2'); if (h2) document.getElementById('h-acct2').value = h2;
+      const h3 = localStorage.getItem('pf_h3'); if (h3) document.getElementById('h-acct3').value = h3;
     } catch(e) {
       rows = DEFAULT_ROWS.map(x => ({...x}));
     }
@@ -231,11 +289,19 @@
     return stockTotal + cash;
   }
 
+  function calcTarget(pct, budget, price) {
+    if (budget <= 0 || price <= 0 || pct <= 0) return null;
+    return (pct * budget) / price;
+  }
+
   function recalc() {
-    const total1 = getTotal1();
-    const budget = parseFloat(document.getElementById('acct2-budget').value) || 0;
+    const total1  = getTotal1();
+    const budget2 = parseFloat(document.getElementById('acct2-budget').value) || 0;
+    const budget3 = parseFloat(document.getElementById('acct3-budget').value) || 0;
     document.getElementById('acct1-total').textContent = fmt$(total1);
-    let allocated = 0;
+
+    let allocated2 = 0;
+    let allocated3 = 0;
 
     rows.forEach((r, i) => {
       const price   = parseFloat(r.price);
@@ -243,29 +309,50 @@
       const val1    = isNaN(price * shares1) ? 0 : price * shares1;
       const pct     = total1 > 0 ? val1 / total1 : 0;
 
+      // Acct1
       const sub1 = document.getElementById(`sub1-${i}`);
       const pct1 = document.getElementById(`pct1-${i}`);
       if (sub1) sub1.textContent = val1 > 0 ? fmt$(val1) : '—';
       if (pct1) pct1.textContent = (total1 > 0 && val1 > 0) ? (pct*100).toFixed(1)+'%' : '';
 
-      const res  = document.getElementById(`res-${i}`);
+      // Acct2
+      const res2 = document.getElementById(`res2-${i}`);
       const sub2 = document.getElementById(`sub2-${i}`);
       const pct2 = document.getElementById(`pct2-${i}`);
-      if (!res) return;
+      if (res2) {
+        const shs2 = calcTarget(pct, budget2, price);
+        if (shs2 !== null) {
+          allocated2 += pct * budget2;
+          res2.className = 'result-shares green';
+          res2.innerHTML = `${shs2.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
+          if (sub2) sub2.textContent = fmt$(pct * budget2);
+          if (pct2) pct2.textContent = (pct*100).toFixed(1)+'%';
+        } else {
+          res2.className = 'result-shares empty';
+          res2.textContent = budget2 > 0 ? '—' : 'Enter budget →';
+          if (sub2) sub2.textContent = '';
+          if (pct2) pct2.textContent = '';
+        }
+      }
 
-      if (budget > 0 && price > 0 && pct > 0) {
-        const targetVal    = pct * budget;
-        const sharesNeeded = targetVal / price;
-        allocated += targetVal;
-        res.className = 'result-shares';
-        res.innerHTML = `${sharesNeeded.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
-        if (sub2) sub2.textContent = fmt$(targetVal);
-        if (pct2) pct2.textContent = (pct*100).toFixed(1)+'%';
-      } else {
-        res.className = 'result-shares empty';
-        res.textContent = budget > 0 ? '—' : 'Enter budget →';
-        if (sub2) sub2.textContent = '';
-        if (pct2) pct2.textContent = '';
+      // Acct3
+      const res3 = document.getElementById(`res3-${i}`);
+      const sub3 = document.getElementById(`sub3-${i}`);
+      const pct3 = document.getElementById(`pct3-${i}`);
+      if (res3) {
+        const shs3 = calcTarget(pct, budget3, price);
+        if (shs3 !== null) {
+          allocated3 += pct * budget3;
+          res3.className = 'result-shares purple';
+          res3.innerHTML = `${shs3.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
+          if (sub3) sub3.textContent = fmt$(pct * budget3);
+          if (pct3) pct3.textContent = (pct*100).toFixed(1)+'%';
+        } else {
+          res3.className = 'result-shares empty';
+          res3.textContent = budget3 > 0 ? '—' : 'Enter budget →';
+          if (sub3) sub3.textContent = '';
+          if (pct3) pct3.textContent = '';
+        }
       }
     });
 
@@ -275,28 +362,42 @@
     document.getElementById('cash1-sub').textContent = cash1Val > 0 ? fmt$(cash1Val) : '—';
     document.getElementById('cash1-pct').textContent = (cash1Val > 0 && total1 > 0) ? (cashPct*100).toFixed(1)+'%' : '';
 
+    // Cash acct2
     const cash2Amt = document.getElementById('cash2-amount');
     const cash2Pct = document.getElementById('cash2-pct');
-    if (budget > 0 && cashPct > 0) {
-      const cashTarget = cashPct * budget;
-      allocated += cashTarget;
-      cash2Amt.className = 'result-shares';
-      cash2Amt.textContent = fmt$(cashTarget);
+    if (budget2 > 0 && cashPct > 0) {
+      const t = cashPct * budget2;
+      allocated2 += t;
+      cash2Amt.className = 'result-shares green';
+      cash2Amt.textContent = fmt$(t);
       cash2Pct.textContent = (cashPct*100).toFixed(1)+'%';
     } else {
       cash2Amt.className = 'result-shares empty';
-      cash2Amt.textContent = budget > 0 ? '—' : 'Enter budget →';
+      cash2Amt.textContent = budget2 > 0 ? '—' : 'Enter budget →';
       cash2Pct.textContent = '';
     }
 
-    document.getElementById('acct2-allocated').textContent = fmt$(allocated);
+    // Cash acct3
+    const cash3Amt = document.getElementById('cash3-amount');
+    const cash3Pct = document.getElementById('cash3-pct');
+    if (budget3 > 0 && cashPct > 0) {
+      const t = cashPct * budget3;
+      allocated3 += t;
+      cash3Amt.className = 'result-shares purple';
+      cash3Amt.textContent = fmt$(t);
+      cash3Pct.textContent = (cashPct*100).toFixed(1)+'%';
+    } else {
+      cash3Amt.className = 'result-shares empty';
+      cash3Amt.textContent = budget3 > 0 ? '—' : 'Enter budget →';
+      cash3Pct.textContent = '';
+    }
+
+    document.getElementById('acct2-allocated').textContent = fmt$(allocated2);
+    document.getElementById('acct3-allocated').textContent = fmt$(allocated3);
   }
 
   function renderRows() {
-    // Remove all existing stock rows
     document.querySelectorAll('.row-stock').forEach(r => r.remove());
-
-    // Insert stock rows before cash row
     const cashRow = document.getElementById('cash-row');
 
     rows.forEach((r, i) => {
@@ -328,10 +429,17 @@
           </div>
         </td>
         <td class="c-acct2">
-          <span class="result-shares empty" id="res-${i}">Enter budget →</span>
+          <span class="result-shares green empty" id="res2-${i}">Enter budget →</span>
           <div class="cell-sub">
             <span id="sub2-${i}"></span>
             <span class="badge badge-green" id="pct2-${i}"></span>
+          </div>
+        </td>
+        <td class="c-acct3">
+          <span class="result-shares purple empty" id="res3-${i}">Enter budget →</span>
+          <div class="cell-sub">
+            <span id="sub3-${i}"></span>
+            <span class="badge badge-purple" id="pct3-${i}"></span>
           </div>
         </td>
       `;
