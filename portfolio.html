@@ -1,1651 +1,596 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PORTEX — Portfolio Intelligence</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Ratio Calc</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ffffff; }
+  body { color: #111; font-family: 'IBM Plex Sans', sans-serif; padding: 28px 16px 60px; }
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-      from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+  .page-header { max-width: 1100px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .page-title { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  .page-subtitle { font-size: 12px; color: #777; }
+  .sync-status { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 4px; }
+  .sync-status.synced  { background: #edf7f2; color: #1a7a4a; }
+  .sync-status.saving  { background: #fff8e0; color: #8a6a00; }
+  .sync-status.error   { background: #fdedf0; color: #b83232; }
 
-    // ──────────────────────────────────────────
-    //  🔧 YOUR FIREBASE CONFIG — replace below
-    // ──────────────────────────────────────────
-    const firebaseConfig = {
-      apiKey:            "AIzaSyCwUS9-uzZtmXzeIC-dDKcPJvrSbndL7L8",
-      authDomain:        "portfolio-e7706.firebaseapp.com",
-      projectId:         "portfolio-e7706",
-      storageBucket:     "portfolio-e7706.firebasestorage.app",
-      messagingSenderId: "256442360821",
-      appId:             "1:256442360821:web:cba2f574b3099da79936bc",
-      databaseURL:       "https://portfolio-e7706-default-rtdb.firebaseio.com"
-    };
+  table { max-width: 1100px; width: 100%; margin: 0 auto; border-collapse: collapse; border: 1.5px solid #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 3px 3px 0 rgba(0,0,0,0.07); }
+  col.c-ticker { width: 130px; }
 
-    try {
-      const app      = initializeApp(firebaseConfig);
-      const db       = getFirestore(app);
-      const auth     = getAuth(app);
-      const provider = new GoogleAuthProvider();
+  .row-header th { padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; border-bottom: 1.5px solid #1a1a1a; text-align: left; }
+  .row-header .c-ticker { background: #1a1a1a; border-right: 1.5px solid #1a1a1a; }
+  .row-header .c-acct1  { background: #1a3fa8; border-right: 1px solid rgba(255,255,255,0.2); }
+  .row-header .c-acct2  { background: #1a7a4a; border-right: 1px solid rgba(255,255,255,0.2); }
+  .row-header .c-acct3  { background: #7a1a6a; }
 
-      window._firebase = { db, auth, provider, doc, setDoc, getDoc, signInWithPopup, signOut, onAuthStateChanged };
-      window._firebaseReady = true;
+  .row-summary td { border-bottom: 1.5px solid #1a1a1a; padding: 14px; vertical-align: middle; }
+  .row-summary .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
+  .row-summary .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
+  .row-summary .c-acct2  { background: #f2faf6; border-right: 1px solid #ddd; }
+  .row-summary .c-acct3  { background: #faf2f9; }
 
-      // Auth 상태 감지 — 로그인 유지
-      onAuthStateChanged(auth, user => {
-        window._currentUser = user;
-        if (typeof window._onAuthChange === 'function') window._onAuthChange(user);
-      });
-    } catch(e) {
-      console.warn('Firebase init failed — running in local mode', e);
-      window._firebaseReady = false;
-    }
-  </script>
+  .s-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+  .s-value { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+  .s-value.blue   { color: #1a3fa8; }
+  .s-value.green  { color: #1a7a4a; }
+  .s-value.purple { color: #7a1a6a; }
+  .budget-wrap { display: flex; align-items: center; gap: 1px; }
+  .budget-dollar-green  { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #1a7a4a; }
+  .budget-dollar-purple { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #7a1a6a; }
+  .budget-input { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; background: transparent; border: none; outline: none; width: 100%; padding: 0; }
+  .budget-input.green  { color: #1a7a4a; }
+  .budget-input.purple { color: #7a1a6a; }
+  .budget-input.green::placeholder  { color: #a0c8b8; font-weight: 400; font-size: 16px; }
+  .budget-input.purple::placeholder { color: #c8a0c4; font-weight: 400; font-size: 16px; }
+  .s-note { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-top: 5px; }
+  .s-note.green  span { color: #1a7a4a; }
+  .s-note.purple span { color: #7a1a6a; }
+  .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
 
-  <style>
-    :root {
-      --bg:        #0a0a0f;
-      --surface:   #111118;
-      --surface2:  #18181f;
-      --border:    #2a2a38;
-      --accent:    #00e5ff;
-      --accent2:   #7c3aed;
-      --green:     #00ff88;
-      --red:       #ff4455;
-      --yellow:    #ffd84d;
-      --text:      #e8e8f0;
-      --muted:     #6b6b7e;
-      --font-head: 'Syne', sans-serif;
-      --font-mono: 'Space Mono', monospace;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-mono);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+  .row-stock td { border-bottom: 1px solid #e8e8e8; padding: 10px 14px; vertical-align: middle; }
+  .row-stock .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
+  .row-stock .c-acct1  { background: #fff;    border-right: 1px solid #e8e8e8; }
+  .row-stock .c-acct2  { background: #f2faf6; border-right: 1px solid #e8e8e8; }
+  .row-stock .c-acct3  { background: #faf2f9; }
 
-    /* ── NOISE OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      background-size: 200px;
-      pointer-events: none;
-      z-index: 0;
-    }
+  .ticker-input { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; background: transparent; border: none; outline: none; color: #111; width: 100%; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .ticker-input::placeholder { color: #ccc; font-weight: 400; text-transform: none; }
+  .price-wrap { display: flex; align-items: center; gap: 3px; }
+  .price-sym { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #999; }
+  .price-input { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #888; background: transparent; border: none; border-bottom: 1px dashed #ccc; outline: none; width: 100%; padding: 1px 0; }
+  .price-input::placeholder { color: #ccc; }
+  .price-input:focus { border-bottom-color: #1a3fa8; color: #111; }
+  .price-input.live { color: #1a7a4a; border-bottom-color: #1a7a4a; }
 
-    /* ── LAYOUT ── */
-    .app { position: relative; z-index: 1; }
+  .shares-input { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; background: transparent; border: none; border-bottom: 1.5px solid transparent; outline: none; color: #111; width: 100%; padding: 1px 0; display: block; margin-bottom: 6px; }
+  .shares-input:focus { border-bottom-color: #1a3fa8; }
+  .shares-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
 
-    /* ── TOP NAV ── */
-    nav {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 32px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(10,10,15,0.85);
-      backdrop-filter: blur(12px);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav-logo {
-      font-family: var(--font-head);
-      font-size: 22px; font-weight: 800;
-      letter-spacing: -0.5px;
-      color: var(--accent);
-    }
-    .nav-logo span { color: var(--text); }
-    .nav-status {
-      font-size: 11px; color: var(--muted);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .status-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 6px var(--green);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .cell-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #888; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .badge { font-size: 13px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+  .badge-blue   { background: #edf1fb; color: #1a3fa8; }
+  .badge-green  { background: #edf7f2; color: #1a7a4a; }
+  .badge-purple { background: #f7edf6; color: #7a1a6a; }
 
-    .nav-actions { display: flex; gap: 10px; }
-    .btn {
-      padding: 8px 16px; border: 1px solid var(--border);
-      background: transparent; color: var(--text);
-      font-family: var(--font-mono); font-size: 12px;
-      cursor: pointer; transition: all .2s;
-      letter-spacing: 0.5px;
-    }
-    .btn:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-primary {
-      background: var(--accent); color: #000;
-      border-color: var(--accent); font-weight: 700;
-    }
-    .btn-primary:hover { background: #00c8e0; color: #000; }
+  .result-shares { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; display: block; margin-bottom: 6px; }
+  .result-shares.green  { color: #1a7a4a; }
+  .result-shares.purple { color: #7a1a6a; }
+  .result-shares.empty  { font-size: 12px; font-weight: 400; color: #bbb; }
 
-    /* ── MAIN ── */
-    main { max-width: 1400px; margin: 0 auto; padding: 32px; }
+  .row-cash td { border-bottom: 1.5px solid #1a1a1a; padding: 10px 14px; vertical-align: middle; }
+  .row-cash .c-ticker { background: #fffbea; border-right: 1.5px solid #1a1a1a; }
+  .row-cash .c-acct1  { background: #fffbea; border-right: 1px solid #e8dfa0; }
+  .row-cash .c-acct2  { background: #f4fbf0; border-right: 1px solid #e8e8e8; }
+  .row-cash .c-acct3  { background: #fbf0fa; }
+  .cash-input { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; background: transparent; border: none; border-bottom: 1.5px solid transparent; outline: none; color: #111; width: 100%; padding: 1px 0; display: block; margin-bottom: 6px; }
+  .cash-input:focus { border-bottom-color: #8a7a00; }
+  .cash-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
 
-    /* ── TABS ── */
-    .tabs { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
-    .tab {
-      padding: 12px 24px; cursor: pointer; font-size: 12px;
-      letter-spacing: 1px; text-transform: uppercase;
-      color: var(--muted); border-bottom: 2px solid transparent;
-      margin-bottom: -1px; transition: all .2s;
-    }
-    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-    .tab:hover:not(.active) { color: var(--text); }
+  .row-footer td { padding: 10px 14px; vertical-align: middle; }
+  .row-footer .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
+  .row-footer .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
+  .row-footer .c-acct2  { background: #f2faf6; border-right: 1px solid #ddd; }
+  .row-footer .c-acct3  { background: #faf2f9; }
 
-    /* ── DASHBOARD ── */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px; margin-bottom: 28px;
-    }
-    .kpi-card {
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 20px 24px; position: relative; overflow: hidden;
-    }
-    .kpi-card::after {
-      content: ''; position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: var(--accent);
-    }
-    .kpi-card.green::after { background: var(--green); }
-    .kpi-card.red::after   { background: var(--red); }
-    .kpi-card.purple::after{ background: var(--accent2); }
-    .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
-    .kpi-value { font-family: var(--font-head); font-size: 28px; font-weight: 800; }
-    .kpi-sub   { font-size: 11px; margin-top: 6px; }
-    .pos { color: var(--green); }
-    .neg { color: var(--red); }
+  .btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; border: 1.5px solid #1a1a1a; border-radius: 6px; padding: 6px 14px; cursor: pointer; background: white; color: #111; transition: all 0.15s; }
+  .btn:hover { background: #1a1a1a; color: white; }
+  .btn-sort    { border-color: #555; color: #555; }
+  .btn-sort:hover    { background: #555; color: white; }
+  .btn-refresh { border-color: #1a7a4a; color: #1a7a4a; }
+  .btn-refresh:hover { background: #1a7a4a; color: white; }
 
-    /* ── GRID 2-col ── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-    @media(max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+  .header-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.3); outline: none; width: 100%; padding: 1px 0; cursor: text; }
 
-    /* ── PANEL ── */
-    .panel {
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 20px 24px;
-    }
-    .panel-title {
-      font-family: var(--font-head); font-size: 13px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 2px;
-      color: var(--muted); margin-bottom: 18px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-
-    /* ── BENCHMARK BARS ── */
-    .bench-item { margin-bottom: 14px; }
-    .bench-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
-    .bench-bar-bg { height: 6px; background: var(--surface2); position: relative; }
-    .bench-bar { height: 6px; transition: width .8s cubic-bezier(.16,1,.3,1); }
-
-    /* ── ALLOCATION CHART ── */
-    .alloc-canvas { width: 100%; max-width: 260px; margin: 0 auto; display: block; }
-    .alloc-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: center; }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; }
-    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-    /* ── TABLE ── */
-    .asset-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .asset-table th {
-      text-align: left; padding: 8px 12px;
-      color: var(--muted); font-size: 10px; text-transform: uppercase;
-      letter-spacing: 1.2px; border-bottom: 1px solid var(--border);
-    }
-    .asset-table td { padding: 12px 12px; border-bottom: 1px solid rgba(42,42,56,.5); vertical-align: middle; }
-    .asset-table tr:hover td { background: var(--surface2); }
-    .asset-name { font-weight: 700; font-family: var(--font-head); font-size: 13px; }
-    .asset-ticker { font-size: 10px; color: var(--muted); }
-    .badge {
-      display: inline-block; padding: 2px 8px; font-size: 9px;
-      text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
-    }
-    .badge-stock { background: rgba(0,229,255,.12); color: var(--accent); border: 1px solid rgba(0,229,255,.25); }
-    .badge-crypto { background: rgba(255,216,77,.1); color: var(--yellow); border: 1px solid rgba(255,216,77,.25); }
-    .badge-cash   { background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.25); }
-
-    .icon-btn {
-      background: none; border: 1px solid var(--border);
-      color: var(--muted); cursor: pointer; padding: 4px 8px;
-      font-size: 11px; transition: all .2s;
-    }
-    .icon-btn:hover { color: var(--red); border-color: var(--red); }
-
-    /* ── AI UPLOAD PANEL ── */
-    .upload-zone {
-      border: 2px dashed var(--border);
-      padding: 48px 24px; text-align: center;
-      transition: all .3s; cursor: pointer; position: relative;
-    }
-    .upload-zone:hover, .upload-zone.dragover {
-      border-color: var(--accent);
-      background: rgba(0,229,255,.04);
-    }
-    .upload-icon { font-size: 40px; margin-bottom: 12px; }
-    .upload-hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
-    #fileInput { display: none; }
-
-    .ai-result {
-      background: var(--surface2); border: 1px solid var(--border);
-      padding: 16px; margin-top: 16px; font-size: 12px;
-      max-height: 320px; overflow-y: auto; display: none;
-    }
-    .ai-result.visible { display: block; }
-    .ai-result pre { white-space: pre-wrap; color: var(--accent); line-height: 1.6; }
-
-    .parsed-assets { margin-top: 16px; display: none; }
-    .parsed-assets.visible { display: block; }
-    .parsed-asset-row {
-      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto;
-      gap: 10px; align-items: center;
-      padding: 10px 12px; border: 1px solid var(--border);
-      margin-bottom: 8px; background: var(--surface2);
-      font-size: 12px;
-    }
-    .parsed-asset-row input, .parsed-asset-row select {
-      background: var(--bg); border: 1px solid var(--border);
-      color: var(--text); padding: 5px 8px;
-      font-family: var(--font-mono); font-size: 11px; width: 100%;
-    }
-
-    /* ── MODAL ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
-      z-index: 999; align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 32px; width: 480px; max-width: 95vw;
-    }
-    .modal-title {
-      font-family: var(--font-head); font-size: 18px; font-weight: 800;
-      margin-bottom: 24px;
-    }
-    .form-group { margin-bottom: 16px; }
-    .form-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
-    .form-input, .form-select {
-      width: 100%; background: var(--bg); border: 1px solid var(--border);
-      color: var(--text); padding: 10px 12px;
-      font-family: var(--font-mono); font-size: 13px;
-    }
-    .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); }
-    .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
-
-    /* ── LOADING SPINNER ── */
-    .spinner {
-      display: inline-block; width: 16px; height: 16px;
-      border: 2px solid var(--border); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-bar {
-      height: 3px; background: var(--border); overflow: hidden;
-      margin: 8px 0;
-    }
-    .loading-bar-fill {
-      height: 100%; background: var(--accent);
-      animation: loadbar 1.5s ease-in-out infinite;
-    }
-    @keyframes loadbar {
-      0% { width:0%; margin-left:0% }
-      50% { width:60%; margin-left:20% }
-      100% { width:0%; margin-left:100% }
-    }
-
-    /* ── EMPTY STATE ── */
-    .empty-state {
-      text-align: center; padding: 60px 20px; color: var(--muted);
-    }
-    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: .4; }
-    .empty-text { font-size: 13px; line-height: 1.8; }
-
-    /* ── TOAST ── */
-    .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 14px 20px; font-size: 12px; z-index: 9999;
-      transform: translateY(80px); opacity: 0;
-      transition: all .3s cubic-bezier(.16,1,.3,1);
-      max-width: 300px;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { border-color: var(--green); }
-    .toast.error   { border-color: var(--red); }
-
-    /* ── ACCOUNT FILTER ── */
-    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-    .filter-chip {
-      padding: 5px 14px; border: 1px solid var(--border);
-      font-size: 11px; cursor: pointer; transition: all .15s;
-      background: transparent; color: var(--muted); font-family: var(--font-mono);
-    }
-    .filter-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,.07); }
-
-    /* ── SCROLL ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); }
-
-    /* ── FIREBASE SETUP BANNER ── */
-    .setup-banner {
-      background: rgba(255,216,77,.08); border: 1px solid rgba(255,216,77,.3);
-      padding: 14px 20px; margin-bottom: 24px;
-      font-size: 12px; color: var(--yellow);
-      display: flex; align-items: center; gap: 10px;
-    }
-  </style>
+  @media (max-width: 700px) {
+    col.c-ticker { width: 90px; }
+    .s-value { font-size: 15px; }
+    .result-shares { font-size: 14px; }
+  }
+</style>
 </head>
 <body>
-<div class="app">
 
-  <!-- NAV -->
-  <nav>
-    <div class="nav-logo">PORT<span>EX</span></div>
-    <div class="nav-status">
-      <div class="status-dot"></div>
-      <span id="syncStatus">로컬 모드</span>
-    </div>
-    <div class="nav-actions" id="navActions">
-      <!-- 로그인 전 -->
-      <button class="btn btn-primary" id="loginBtn" onclick="googleLogin()" style="display:none">
-        <svg style="width:14px;height:14px;vertical-align:middle;margin-right:6px" viewBox="0 0 48 48">
-          <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/>
-          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-          <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.5 35.6 26.9 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.5 5C9.5 39.6 16.3 44 24 44z"/>
-          <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.2 5.2C41 35.2 44 30 44 24c0-1.3-.1-2.7-.4-4z"/>
-        </svg>
-        Google 로그인
-      </button>
-      <!-- 로그인 후 -->
-      <div id="authedActions" style="display:none;align-items:center;gap:10px">
-        <button class="btn" onclick="openModal('addAsset')">+ 자산 추가</button>
-        <button class="btn btn-primary" onclick="openModal('addAccount')">+ 계좌 추가</button>
-        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="toggleUserMenu()">
-          <img id="userPhoto" src="" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--accent)" onerror="this.style.display='none'">
-          <span id="userName" style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- 유저 드롭다운 -->
-  <div id="userMenu" style="display:none;position:fixed;top:62px;right:24px;
-       background:var(--surface);border:1px solid var(--border);
-       padding:8px 0;z-index:200;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
-    <div id="userMenuEmail" style="padding:12px 16px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)"></div>
-    <button onclick="googleLogout()" style="width:100%;padding:11px 16px;background:none;border:none;
-            color:var(--red);font-family:var(--font-mono);font-size:12px;text-align:left;cursor:pointer;letter-spacing:.5px">
-      ⏻  로그아웃
-    </button>
-  </div>
-
-  <main>
-
-    <!-- Firebase 미설정 안내 -->
-    <div class="setup-banner" id="firebaseBanner" style="display:none">
-      ⚡ Firebase 미연결 — 데이터가 로컬(localStorage)에만 저장됩니다.
-      <a href="#firebase-setup" style="color:var(--yellow);text-decoration:underline;margin-left:auto">설정 방법 보기 ↓</a>
-    </div>
-
-    <!-- TABS -->
-    <div class="tabs">
-      <div class="tab active" data-tab="dashboard">대시보드</div>
-      <div class="tab" data-tab="assets">자산 관리</div>
-      <div class="tab" data-tab="ai-import">AI 파싱</div>
-      <div class="tab" data-tab="benchmark">수익률 비교</div>
-      <div class="tab" data-tab="setup">설정</div>
-    </div>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  TAB: DASHBOARD                        -->
-    <!-- ══════════════════════════════════════ -->
-    <div id="tab-dashboard" class="tab-content">
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">총 자산</div>
-          <div class="kpi-value" id="kpi-total">₩0</div>
-          <div class="kpi-sub" id="kpi-total-sub">0개 자산</div>
-        </div>
-        <div class="kpi-card green">
-          <div class="kpi-label">평가손익</div>
-          <div class="kpi-value" id="kpi-pnl">₩0</div>
-          <div class="kpi-sub" id="kpi-pnl-pct">0.00%</div>
-        </div>
-        <div class="kpi-card purple">
-          <div class="kpi-label">주식 비중</div>
-          <div class="kpi-value" id="kpi-stock-pct">0%</div>
-          <div class="kpi-sub" id="kpi-stock-val">₩0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">코인 비중</div>
-          <div class="kpi-value" id="kpi-crypto-pct">0%</div>
-          <div class="kpi-sub" id="kpi-crypto-val">₩0</div>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <!-- 자산 배분 -->
-        <div class="panel">
-          <div class="panel-title">자산 배분</div>
-          <canvas id="allocChart" class="alloc-canvas" width="260" height="260"></canvas>
-          <div class="alloc-legend" id="allocLegend"></div>
-        </div>
-
-        <!-- 계좌별 현황 -->
-        <div class="panel">
-          <div class="panel-title">계좌별 현황</div>
-          <div id="accountSummary">
-            <div class="empty-state">
-              <div class="empty-icon">🏦</div>
-              <div class="empty-text">계좌를 추가해 주세요</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Top Movers -->
-      <div class="panel">
-        <div class="panel-title">보유 자산</div>
-        <div id="dashAssetList">
-          <div class="empty-state">
-            <div class="empty-icon">📊</div>
-            <div class="empty-text">자산을 추가하거나<br>AI 파싱으로 스크린샷을 업로드하세요</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  TAB: ASSETS                           -->
-    <!-- ══════════════════════════════════════ -->
-    <div id="tab-assets" class="tab-content" style="display:none">
-      <div class="filter-bar" id="accountFilterBar">
-        <button class="filter-chip active" data-account="all">전체</button>
-      </div>
-      <div class="panel">
-        <table class="asset-table">
-          <thead>
-            <tr>
-              <th>종목명</th>
-              <th>유형</th>
-              <th>계좌</th>
-              <th>보유수량</th>
-              <th>평균단가</th>
-              <th>현재가</th>
-              <th>평가금액</th>
-              <th>손익</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="assetTableBody">
-            <tr><td colspan="9">
-              <div class="empty-state">
-                <div class="empty-icon">📈</div>
-                <div class="empty-text">자산이 없습니다</div>
-              </div>
-            </td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  TAB: AI IMPORT                        -->
-    <!-- ══════════════════════════════════════ -->
-    <div id="tab-ai-import" class="tab-content" style="display:none">
-      <div class="grid-2">
-        <div>
-          <div class="panel" style="margin-bottom:20px">
-            <div class="panel-title">스크린샷 업로드</div>
-            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-              <div class="upload-icon">🤖</div>
-              <div style="font-family:var(--font-head);font-size:16px;font-weight:700">Claude AI 자동 파싱</div>
-              <div class="upload-hint">
-                증권사 / 거래소 앱 스크린샷을 업로드하면<br>
-                AI가 자동으로 자산 정보를 추출합니다<br><br>
-                <strong style="color:var(--accent)">클릭 또는 드래그&드롭</strong><br>
-                JPG · PNG · WEBP 지원
-              </div>
-            </div>
-            <input type="file" id="fileInput" accept="image/*">
-
-            <div style="margin-top:16px">
-              <label class="form-label">대상 계좌</label>
-              <select class="form-select" id="aiTargetAccount">
-                <option value="">계좌 선택 (미선택 시 기본)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- AI 응답 -->
-          <div class="panel">
-            <div class="panel-title">
-              AI 분석 결과
-              <span id="aiSpinner" style="display:none"><div class="spinner"></div></span>
-            </div>
-            <div id="aiLoadingBar" style="display:none"><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>
-            <div class="ai-result" id="aiResult"><pre id="aiResultText"></pre></div>
-            <div id="noParsedMsg" style="display:none;color:var(--muted);font-size:12px;margin-top:12px">파싱 결과가 없습니다.</div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">파싱된 자산 <span id="parsedCount"></span></div>
-          <div class="parsed-assets" id="parsedAssets"></div>
-          <div id="parsedActions" style="display:none;margin-top:16px">
-            <button class="btn btn-primary" style="width:100%" onclick="importParsedAssets()">✓ 전체 포트폴리오에 추가</button>
-          </div>
-          <div class="empty-state" id="parsedEmpty">
-            <div class="empty-icon">🔍</div>
-            <div class="empty-text">스크린샷을 업로드하면<br>여기서 검토 후 추가할 수 있습니다</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  TAB: BENCHMARK                        -->
-    <!-- ══════════════════════════════════════ -->
-    <div id="tab-benchmark" class="tab-content" style="display:none">
-      <div class="kpi-grid" style="margin-bottom:24px">
-        <div class="kpi-card">
-          <div class="kpi-label">내 포트폴리오 (1개월)</div>
-          <div class="kpi-value" id="bench-my">—</div>
-          <div class="kpi-sub" style="color:var(--muted)">평가손익 기준</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">S&P 500 (1개월)</div>
-          <div class="kpi-value" id="bench-sp">—</div>
-          <div class="kpi-sub" id="bench-sp-sub" style="color:var(--muted)">로드 중...</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">NASDAQ (1개월)</div>
-          <div class="kpi-value" id="bench-nq">—</div>
-          <div class="kpi-sub" id="bench-nq-sub" style="color:var(--muted)">로드 중...</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">초과수익 (vs S&P)</div>
-          <div class="kpi-value" id="bench-alpha">—</div>
-          <div class="kpi-sub" style="color:var(--muted)">알파</div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-bottom:20px">
-        <div class="panel-title">1개월 수익률 비교</div>
-        <div style="margin-bottom:16px">
-          <div class="bench-item">
-            <div class="bench-label"><span>내 포트폴리오</span><span id="bv-my">—</span></div>
-            <div class="bench-bar-bg"><div class="bench-bar" id="bb-my" style="background:var(--accent);width:0%"></div></div>
-          </div>
-          <div class="bench-item">
-            <div class="bench-label"><span>S&P 500</span><span id="bv-sp">—</span></div>
-            <div class="bench-bar-bg"><div class="bench-bar" id="bb-sp" style="background:var(--green);width:0%"></div></div>
-          </div>
-          <div class="bench-item">
-            <div class="bench-label"><span>NASDAQ Composite</span><span id="bv-nq">—</span></div>
-            <div class="bench-bar-bg"><div class="bench-bar" id="bb-nq" style="background:var(--yellow);width:0%"></div></div>
-          </div>
-        </div>
-        <div style="color:var(--muted);font-size:11px">
-          * 시장 데이터: Yahoo Finance (CORS 프록시 경유, 미국 ETF 기준 — SPY / QQQ) · 데이터 지연 있을 수 있음<br>
-          * 내 포트폴리오 수익률: 입력된 평균단가 대비 현재가 기준
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-title">비교 차트</div>
-        <canvas id="benchChart" style="width:100%;height:220px"></canvas>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  TAB: SETUP                            -->
-    <!-- ══════════════════════════════════════ -->
-    <div id="tab-setup" class="tab-content" style="display:none">
-      <div class="grid-2">
-        <div class="panel" id="firebase-setup">
-          <div class="panel-title">Firebase 설정</div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px">
-            클라우드 저장을 위해 Firebase Firestore를 연결하세요.<br>
-            아래 설정값을 <code style="color:var(--accent)">index.html</code> 상단<br>
-            <code style="color:var(--accent)">firebaseConfig</code> 객체에 입력하면 됩니다.
-          </p>
-          <div style="background:var(--surface2);border:1px solid var(--border);padding:16px;font-size:11px;color:var(--accent);line-height:2;margin-bottom:16px">
-            1. console.firebase.google.com 접속<br>
-            2. 새 프로젝트 생성<br>
-            3. Firestore Database 활성화 (테스트 모드)<br>
-            4. 프로젝트 설정 > 앱 추가 > 웹<br>
-            5. firebaseConfig 값 복사 후 아래 저장
-          </div>
-          <div class="form-group">
-            <label class="form-label">API Key</label>
-            <input class="form-input" id="cfg-apiKey" placeholder="AIza...">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Project ID</label>
-            <input class="form-input" id="cfg-projectId" placeholder="my-portfolio-xxxxx">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Auth Domain</label>
-            <input class="form-input" id="cfg-authDomain" placeholder="my-portfolio.firebaseapp.com">
-          </div>
-          <div class="form-group">
-            <label class="form-label">App ID</label>
-            <input class="form-input" id="cfg-appId" placeholder="1:123456:web:abc123">
-          </div>
-          <button class="btn btn-primary" style="width:100%" onclick="saveFirebaseConfig()">설정 저장 (재시작 필요)</button>
-          <div style="margin-top:12px;font-size:11px;color:var(--muted)">저장 후 페이지를 새로고침하면 적용됩니다</div>
-        </div>
-
-        <div>
-          <div class="panel" style="margin-bottom:20px">
-            <div class="panel-title">GitHub Pages 배포</div>
-            <p style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:12px">
-              이 단일 HTML 파일을 GitHub에 업로드하면<br>즉시 배포됩니다.
-            </p>
-            <div style="background:var(--surface2);border:1px solid var(--border);padding:14px;font-size:11px;color:var(--accent);line-height:2">
-              1. GitHub 리포 생성 (Public)<br>
-              2. <code>index.html</code> 업로드<br>
-              3. Settings > Pages > main branch 선택<br>
-              4. <strong>https://username.github.io/repo</strong> 접근
-            </div>
-          </div>
-
-          <div class="panel" style="margin-bottom:20px">
-            <div class="panel-title">데이터 관리</div>
-            <button class="btn" style="width:100%;margin-bottom:8px" onclick="exportData()">📦 JSON 내보내기</button>
-            <button class="btn" style="width:100%;margin-bottom:8px" onclick="document.getElementById('importInput').click()">📂 JSON 가져오기</button>
-            <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
-            <button class="btn" style="width:100%;color:var(--red);border-color:var(--red)" onclick="clearAllData()">🗑 전체 초기화</button>
-          </div>
-
-          <div class="panel">
-            <div class="panel-title">앱 정보</div>
-            <div style="font-size:12px;color:var(--muted);line-height:2">
-              <div>버전: <span style="color:var(--text)">1.0.0</span></div>
-              <div>저장소: <span id="storageInfo" style="color:var(--text)">로컬</span></div>
-              <div>자산 수: <span id="assetCount" style="color:var(--text)">0</span></div>
-              <div>계좌 수: <span id="accountCount" style="color:var(--text)">0</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </main>
+<div class="page-header">
+  <div class="page-title">// PORTFOLIO RATIO CALC</div>
+  <div class="page-subtitle">US Equities · Live prices · Cloud sync</div>
+  <div class="sync-status synced" id="sync-status">✓ Synced</div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  MODALS                                    -->
-<!-- ══════════════════════════════════════════ -->
+<table>
+  <colgroup>
+    <col class="c-ticker">
+    <col class="c-acct1">
+    <col class="c-acct2">
+    <col class="c-acct3">
+  </colgroup>
+  <thead>
+    <tr class="row-header">
+      <th class="c-ticker">Ticker</th>
+      <th class="c-acct1"><input class="header-input" id="h-acct1" value="Account 1 — Reference" oninput="saveData()"></th>
+      <th class="c-acct2"><input class="header-input" id="h-acct2" value="Account 2 — Target" oninput="saveData()"></th>
+      <th class="c-acct3"><input class="header-input" id="h-acct3" value="Account 3 — Target" oninput="saveData()"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row-summary">
+      <td class="c-ticker">
+        <div style="font-size:11px;color:#aaa;font-family:monospace">—</div>
+        <div class="last-updated" id="last-updated"></div>
+        <button class="btn btn-sort" onclick="sortAlpha()" style="margin-top:8px;width:100%;">A→Z Sort</button>
+      </td>
+      <td class="c-acct1">
+        <div class="s-label">Total Value</div>
+        <div class="s-value blue" id="acct1-total">$0.00</div>
+      </td>
+      <td class="c-acct2">
+        <div class="s-label">Target Budget</div>
+        <div class="budget-wrap">
+          <span class="budget-dollar-green">$</span>
+          <input type="number" id="acct2-budget" class="budget-input green" placeholder="10000" oninput="recalc();saveData()">
+        </div>
+        <div class="s-note green">Allocated: <span id="acct2-allocated">$0.00</span></div>
+      </td>
+      <td class="c-acct3">
+        <div class="s-label">Target Budget</div>
+        <div class="budget-wrap">
+          <span class="budget-dollar-purple">$</span>
+          <input type="number" id="acct3-budget" class="budget-input purple" placeholder="10000" oninput="recalc();saveData()">
+        </div>
+        <div class="s-note purple">Allocated: <span id="acct3-allocated">$0.00</span></div>
+      </td>
+    </tr>
 
-<!-- Add Account -->
-<div class="modal-overlay" id="modal-addAccount">
-  <div class="modal">
-    <div class="modal-title">계좌 추가</div>
-    <div class="form-group">
-      <label class="form-label">계좌명</label>
-      <input class="form-input" id="acc-name" placeholder="키움 주식, 바이낸스, 미래에셋...">
-    </div>
-    <div class="form-group">
-      <label class="form-label">유형</label>
-      <select class="form-select" id="acc-type">
-        <option value="domestic">국내 주식</option>
-        <option value="us">미국 주식</option>
-        <option value="crypto">암호화폐</option>
-        <option value="mixed">혼합</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">메모 (선택)</label>
-      <input class="form-input" id="acc-memo" placeholder="증권사, 지갑 주소 등">
-    </div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeModal('addAccount')">취소</button>
-      <button class="btn btn-primary" onclick="addAccount()">추가</button>
-    </div>
-  </div>
+    <tr class="row-cash" id="cash-row">
+      <td class="c-ticker">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#7a6000;margin-bottom:3px;">CASH</div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#b8a040;">USD</div>
+      </td>
+      <td class="c-acct1">
+        <div class="price-wrap" style="margin-bottom:6px;">
+          <span class="price-sym">$</span>
+          <input type="number" id="cash1" class="cash-input" placeholder="0.00" step="0.01" oninput="recalc();saveData()">
+        </div>
+        <div class="cell-sub">
+          <span id="cash1-sub">—</span>
+          <span class="badge badge-blue" id="cash1-pct"></span>
+        </div>
+      </td>
+      <td class="c-acct2">
+        <div class="result-shares green empty" id="cash2-amount">Enter budget →</div>
+        <div class="cell-sub"><span class="badge badge-green" id="cash2-pct"></span></div>
+      </td>
+      <td class="c-acct3">
+        <div class="result-shares purple empty" id="cash3-amount">Enter budget →</div>
+        <div class="cell-sub"><span class="badge badge-purple" id="cash3-pct"></span></div>
+      </td>
+    </tr>
+
+    <tr class="row-footer">
+      <td class="c-ticker">
+        <button class="btn" onclick="addRow()">+ Add</button>
+      </td>
+      <td class="c-acct1"></td>
+      <td class="c-acct2">
+        <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ Refresh Prices</button>
+      </td>
+      <td class="c-acct3"></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Firebase -->
+<style>
+  #login-screen {
+    position: fixed; inset: 0; background: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999; gap: 20px;
+  }
+  #login-screen h1 { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  #login-screen p  { font-size: 13px; color: #777; }
+  #google-login-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 24px; border: 1.5px solid #1a1a1a; border-radius: 8px;
+    background: white; cursor: pointer; font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; font-weight: 600; transition: all .15s;
+  }
+  #google-login-btn:hover { background: #1a1a1a; color: white; }
+  #user-bar {
+    display: none; align-items: center; gap: 10px;
+    position: absolute; top: 16px; right: 16px;
+  }
+  #user-bar img { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #ddd; }
+  #user-bar span { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: #777; }
+  #logout-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+    border: 1px solid #ddd; border-radius: 4px; padding: 4px 10px; cursor: pointer;
+    background: white; color: #777; }
+  #logout-btn:hover { border-color: #b83232; color: #b83232; }
+  .page-header { position: relative; }
+</style>
+
+<!-- Login screen -->
+<div id="login-screen">
+  <h1>// PORTFOLIO RATIO CALC</h1>
+  <p>Google 계정으로 로그인하여 데이터를 불러오세요</p>
+  <button id="google-login-btn" onclick="googleLogin()">
+    <svg width="18" height="18" viewBox="0 0 48 48">
+      <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/>
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.5 35.6 26.9 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.5 5C9.5 39.6 16.3 44 24 44z"/>
+      <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.2 5.2C41 35.2 44 30 44 24c0-1.3-.1-2.7-.4-4z"/>
+    </svg>
+    Google로 로그인
+  </button>
 </div>
 
-<!-- Add Asset -->
-<div class="modal-overlay" id="modal-addAsset">
-  <div class="modal">
-    <div class="modal-title">자산 추가</div>
-    <div class="form-group">
-      <label class="form-label">종목명</label>
-      <input class="form-input" id="ast-name" placeholder="삼성전자, 비트코인, NVDA...">
-    </div>
-    <div class="form-group">
-      <label class="form-label">티커/심볼</label>
-      <input class="form-input" id="ast-ticker" placeholder="005930, BTC, NVDA">
-    </div>
-    <div class="form-group">
-      <label class="form-label">유형</label>
-      <select class="form-select" id="ast-type">
-        <option value="stock">주식</option>
-        <option value="crypto">코인</option>
-        <option value="cash">현금/예금</option>
-        <option value="etf">ETF</option>
-        <option value="other">기타</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">계좌</label>
-      <select class="form-select" id="ast-account"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">보유 수량</label>
-      <input class="form-input" type="number" id="ast-qty" placeholder="0">
-    </div>
-    <div class="form-group">
-      <label class="form-label">평균 매입단가</label>
-      <input class="form-input" type="number" id="ast-avg" placeholder="0">
-    </div>
-    <div class="form-group">
-      <label class="form-label">현재가</label>
-      <input class="form-input" type="number" id="ast-price" placeholder="0">
-    </div>
-    <div class="form-group">
-      <label class="form-label">통화</label>
-      <select class="form-select" id="ast-currency">
-        <option value="KRW">KRW (원)</option>
-        <option value="USD">USD (달러)</option>
-        <option value="BTC">BTC</option>
-        <option value="ETH">ETH</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeModal('addAsset')">취소</button>
-      <button class="btn btn-primary" onclick="addAsset()">추가</button>
-    </div>
-  </div>
+<!-- User bar (shown after login) -->
+<div id="user-bar">
+  <img id="user-photo" src="" onerror="this.style.display='none'">
+  <span id="user-name"></span>
+  <button id="logout-btn" onclick="googleLogout()">로그아웃</button>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-<script>
-// ══════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════
-let state = {
-  accounts: [],
-  assets: [],
-  settings: {}
-};
-let activeAccountFilter = 'all';
-let parsedAssetsData = [];
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwUS9-uzZtmXzeIC-dDKcPJvrSbndL7L8",
+    authDomain: "portfolio-e7706.firebaseapp.com",
+    databaseURL: "https://portfolio-e7706-default-rtdb.firebaseio.com",
+    projectId: "portfolio-e7706",
+    storageBucket: "portfolio-e7706.firebasestorage.app",
+    messagingSenderId: "256442360821",
+    appId: "1:256442360821:web:cba2f574b3099da79936bc"
+  };
 
-// ══════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', async () => {
-  loadState();
-  renderAll();
-  setupDrag();
-  setupTabs();
-  initAuth();
-  await fetchBenchmarkData();
+  const app  = initializeApp(firebaseConfig);
+  const db   = getDatabase(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
-  const saved = localStorage.getItem('fbConfig');
-  if (saved) {
-    try {
-      const c = JSON.parse(saved);
-      ['apiKey','projectId','authDomain','appId'].forEach(k => {
-        const el = document.getElementById('cfg-' + k);
-        if (el && c[k]) el.value = c[k];
+  let DB_REF = null;
+  let unsubscribe = null;
+
+  // Google 로그인
+  window.googleLogin = async function() {
+    try { await signInWithPopup(auth, provider); }
+    catch(e) { alert('로그인 실패: ' + e.message); }
+  };
+
+  // 로그아웃
+  window.googleLogout = async function() {
+    if (unsubscribe) unsubscribe();
+    await signOut(auth);
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('user-bar').style.display = 'none';
+  };
+
+  // Auth 상태 감지
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      // 로그인됨
+      document.getElementById('login-screen').style.display = 'none';
+      const bar = document.getElementById('user-bar');
+      bar.style.display = 'flex';
+      document.getElementById('user-photo').src = user.photoURL || '';
+      document.getElementById('user-name').textContent = user.displayName || user.email;
+
+      // 유저별 DB 경로
+      DB_REF = ref(db, 'users/' + user.uid + '/portfolio');
+      startListening();
+    } else {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('user-bar').style.display = 'none';
+    }
+  });
+
+  function startListening() {
+    if (unsubscribe) unsubscribe();
+    unsubscribe = onValue(DB_REF, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) {
+        rows = DEFAULT_ROWS.map(x => ({...x}));
+        renderRows();
+        return;
+      }
+      isLoading = true;
+      rows = data.rows || DEFAULT_ROWS.map(x => ({...x}));
+      if (data.budget2) document.getElementById('acct2-budget').value = data.budget2;
+      if (data.budget3) document.getElementById('acct3-budget').value = data.budget3;
+      if (data.cash1)   document.getElementById('cash1').value = data.cash1;
+      if (data.h1)      document.getElementById('h-acct1').value = data.h1;
+      if (data.h2)      document.getElementById('h-acct2').value = data.h2;
+      if (data.h3)      document.getElementById('h-acct3').value = data.h3;
+      isLoading = false;
+      renderRows();
+      setSyncStatus('synced');
+    });
+  }
+
+  const FINNHUB_KEY = 'd803iupr01qj3ct8tn40d803iupr01qj3ct8tn4g';
+
+  const DEFAULT_ROWS = [
+    { ticker: 'AAPL', price: '', shares1: '10' },
+    { ticker: 'NVDA', price: '', shares1: '5'  },
+    { ticker: 'MSFT', price: '', shares1: '8'  },
+    { ticker: 'TSLA', price: '', shares1: '15' },
+    { ticker: '',     price: '', shares1: ''   },
+  ];
+
+  window.rows = [];
+  let rows = window.rows;
+  let fetchTimer = {};
+  let saveTimer  = null;
+  let isLoading  = false;
+
+  function setSyncStatus(status) {
+    const el = document.getElementById('sync-status');
+    el.className = 'sync-status ' + status;
+    el.textContent = status === 'synced' ? '✓ Synced' : status === 'saving' ? '↑ Saving...' : '✕ Error';
+  }
+
+  // ── Save to Firebase (debounced) ──
+  window.saveData = function() {
+    clearTimeout(saveTimer);
+    setSyncStatus('saving');
+    saveTimer = setTimeout(async () => {
+      try {
+        const data = {
+          rows,
+          budget2: document.getElementById('acct2-budget').value,
+          budget3: document.getElementById('acct3-budget').value,
+          cash1:   document.getElementById('cash1').value,
+          h1:      document.getElementById('h-acct1').value,
+          h2:      document.getElementById('h-acct2').value,
+          h3:      document.getElementById('h-acct3').value,
+        };
+        if (!DB_REF) return;
+        await set(DB_REF, data);
+        setSyncStatus('synced');
+      } catch(e) {
+        setSyncStatus('error');
+      }
+    }, 800);
+  };
+
+
+
+  // ── Formatting ──
+  function fmt$(n) {
+    const num = parseFloat(n);
+    if (isNaN(num)) return '—';
+    return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function getTotal1() {
+    const stockTotal = rows.reduce((s, r) => {
+      const v = parseFloat(r.price) * parseFloat(r.shares1);
+      return s + (isNaN(v) ? 0 : v);
+    }, 0);
+    return stockTotal + (parseFloat(document.getElementById('cash1').value) || 0);
+  }
+
+  // ── Recalc ──
+  window.recalc = function() {
+    const total1  = getTotal1();
+    const budget2 = parseFloat(document.getElementById('acct2-budget').value) || 0;
+    const budget3 = parseFloat(document.getElementById('acct3-budget').value) || 0;
+    document.getElementById('acct1-total').textContent = fmt$(total1);
+    let alloc2 = 0, alloc3 = 0;
+
+    rows.forEach((r, i) => {
+      const price = parseFloat(r.price), shares1 = parseFloat(r.shares1);
+      const val1  = isNaN(price * shares1) ? 0 : price * shares1;
+      const pct   = total1 > 0 ? val1 / total1 : 0;
+
+      const sub1 = document.getElementById(`sub1-${i}`);
+      const pct1 = document.getElementById(`pct1-${i}`);
+      if (sub1) sub1.textContent = val1 > 0 ? fmt$(val1) : '—';
+      if (pct1) pct1.textContent = (total1 > 0 && val1 > 0) ? (pct*100).toFixed(1)+'%' : '';
+
+      ['2','3'].forEach(n => {
+        const budget = n === '2' ? budget2 : budget3;
+        const res  = document.getElementById(`res${n}-${i}`);
+        const sub  = document.getElementById(`sub${n}-${i}`);
+        const pctEl= document.getElementById(`pct${n}-${i}`);
+        if (!res) return;
+        if (budget > 0 && price > 0 && pct > 0) {
+          const tv  = pct * budget;
+          const shs = tv / price;
+          if (n === '2') alloc2 += tv; else alloc3 += tv;
+          res.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
+          res.innerHTML = `${shs.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
+          if (sub)   sub.textContent  = fmt$(tv);
+          if (pctEl) pctEl.textContent= (pct*100).toFixed(1)+'%';
+        } else {
+          res.className = 'result-shares empty';
+          res.textContent = budget > 0 ? '—' : 'Enter budget →';
+          if (sub)   sub.textContent  = '';
+          if (pctEl) pctEl.textContent= '';
+        }
       });
+    });
+
+    // Cash
+    const cv   = parseFloat(document.getElementById('cash1').value) || 0;
+    const cpct = total1 > 0 ? cv / total1 : 0;
+    document.getElementById('cash1-sub').textContent = cv > 0 ? fmt$(cv) : '—';
+    document.getElementById('cash1-pct').textContent = (cv > 0 && total1 > 0) ? (cpct*100).toFixed(1)+'%' : '';
+
+    ['2','3'].forEach(n => {
+      const budget = n === '2' ? budget2 : budget3;
+      const amtEl  = document.getElementById(`cash${n}-amount`);
+      const pctEl  = document.getElementById(`cash${n}-pct`);
+      if (budget > 0 && cpct > 0) {
+        const t = cpct * budget;
+        if (n === '2') alloc2 += t; else alloc3 += t;
+        amtEl.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
+        amtEl.textContent = fmt$(t);
+        pctEl.textContent = (cpct*100).toFixed(1)+'%';
+      } else {
+        amtEl.className = 'result-shares empty';
+        amtEl.textContent = budget > 0 ? '—' : 'Enter budget →';
+        pctEl.textContent = '';
+      }
+    });
+
+    document.getElementById('acct2-allocated').textContent = fmt$(alloc2);
+    document.getElementById('acct3-allocated').textContent = fmt$(alloc3);
+  };
+
+  // ── Row update helpers (accessible from inline handlers) ──
+  window.updateTicker = function(i, val) {
+    rows[i].ticker = val.toUpperCase();
+    document.getElementById('ticker-'+i).value = val.toUpperCase();
+    saveData();
+  };
+  window.updatePrice = function(i, val) {
+    rows[i].price = val;
+    recalc();
+    saveData();
+  };
+  window.updateShares = function(i, val) {
+    rows[i].shares1 = val;
+    recalc();
+    saveData();
+  };
+
+  // ── Render rows ──
+  window.renderRows = function() {
+    document.querySelectorAll('.row-stock').forEach(r => r.remove());
+    const cashRow = document.getElementById('cash-row');
+    rows.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.className = 'row-stock';
+      tr.innerHTML = `
+        <td class="c-ticker">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+            <input class="ticker-input" type="text" placeholder="TICKER" maxlength="6"
+              id="ticker-${i}" value="${r.ticker}" style="margin-bottom:0;"
+              oninput="updateTicker(${i},this.value)"
+              onblur="onTickerBlur(${i})">
+            <button onclick="deleteRow(${i})" style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;background:none;border:none;color:#ccc;cursor:pointer;padding:0 0 0 4px;" onmouseover="this.style.color='#b83232'" onmouseout="this.style.color='#ccc'">×</button>
+          </div>
+          <div class="price-wrap">
+            <span class="price-sym">$</span>
+            <input class="price-input" type="number" placeholder="0.00" step="0.01"
+              id="price-${i}" value="${r.price}"
+              oninput="updatePrice(${i},this.value)">
+          </div>
+        </td>
+        <td class="c-acct1">
+          <input class="shares-input" type="number" placeholder="# shares" step="0.001"
+            value="${r.shares1}"
+            oninput="updateShares(${i},this.value)">
+          <div class="cell-sub">
+            <span id="sub1-${i}">—</span>
+            <span class="badge badge-blue" id="pct1-${i}"></span>
+          </div>
+        </td>
+        <td class="c-acct2">
+          <span class="result-shares green empty" id="res2-${i}">Enter budget →</span>
+          <div class="cell-sub">
+            <span id="sub2-${i}"></span>
+            <span class="badge badge-green" id="pct2-${i}"></span>
+          </div>
+        </td>
+        <td class="c-acct3">
+          <span class="result-shares purple empty" id="res3-${i}">Enter budget →</span>
+          <div class="cell-sub">
+            <span id="sub3-${i}"></span>
+            <span class="badge badge-purple" id="pct3-${i}"></span>
+          </div>
+        </td>
+      `;
+      cashRow.insertAdjacentElement('beforebegin', tr);
+    });
+    recalc();
+  };
+
+  // ── Price fetching ──
+  async function fetchPrice(ticker, index) {
+    if (!ticker) return;
+    const priceEl = document.getElementById(`price-${index}`);
+
+    // Use Finnhub without custom headers to avoid CORS preflight
+    try {
+      const res  = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`);
+      const data = await res.json();
+      if (data && data.c && data.c > 0) {
+        rows[index].price = data.c.toString();
+        if (priceEl) {
+          priceEl.value = data.c.toFixed(2);
+          priceEl.classList.add('live');
+          setTimeout(() => priceEl.classList.remove('live'), 2000);
+        }
+        recalc();
+        saveData();
+        const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('last-updated').textContent = 'Updated ' + t;
+      }
     } catch(e) {}
   }
 
-  // 바깥 클릭시 유저 메뉴 닫기
-  document.addEventListener('click', e => {
-    const menu = document.getElementById('userMenu');
-    if (menu && !menu.contains(e.target) && !e.target.closest('#navActions')) {
-      menu.style.display = 'none';
-    }
-  });
-});
-
-function toggleUserMenu() {
-  const menu = document.getElementById('userMenu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
-function initAuth() {
-  if (!window._firebaseReady) {
-    // 로컬 모드 — 바로 UI 활성화
-    document.getElementById('firebaseBanner').style.display = 'flex';
-    document.getElementById('syncStatus').textContent = '로컬 모드';
-    showAuthedUI(null);
-    return;
-  }
-
-  // Auth 상태 변화 콜백 등록
-  window._onAuthChange = (user) => {
-    if (user) {
-      // 로그인됨
-      document.getElementById('syncStatus').textContent = '로그인됨';
-      showAuthedUI(user);
-      syncFromFirebase();
-    } else {
-      // 로그아웃 상태
-      document.getElementById('syncStatus').textContent = 'Firebase 연결됨';
-      showLoginUI();
+  window.refreshAllPrices = async function() {
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].ticker) await fetchPrice(rows[i].ticker, i);
     }
   };
-}
 
-function showLoginUI() {
-  document.getElementById('loginBtn').style.display = 'flex';
-  document.getElementById('authedActions').style.display = 'none';
-}
+  window.onTickerBlur = function(i) {
+    const ticker = rows[i].ticker;
+    if (ticker) {
+      clearTimeout(fetchTimer[i]);
+      fetchTimer[i] = setTimeout(() => fetchPrice(ticker, i), 300);
+    }
+  };
 
-function showAuthedUI(user) {
-  document.getElementById('loginBtn').style.display = 'none';
-  const authed = document.getElementById('authedActions');
-  authed.style.display = 'flex';
-  if (user) {
-    const photo = document.getElementById('userPhoto');
-    const name  = document.getElementById('userName');
-    const email = document.getElementById('userMenuEmail');
-    if (photo) { photo.src = user.photoURL || ''; photo.style.display = 'block'; }
-    if (name)  name.textContent  = user.displayName || user.email;
-    if (email) email.textContent = user.email;
-  }
-}
-
-async function googleLogin() {
-  if (!window._firebaseReady) return;
-  try {
-    const { auth, provider, signInWithPopup } = window._firebase;
-    await signInWithPopup(auth, provider);
-    showToast('로그인 완료!', 'success');
-  } catch(e) {
-    showToast('로그인 실패: ' + e.message, 'error');
-  }
-}
-
-async function googleLogout() {
-  document.getElementById('userMenu').style.display = 'none';
-  if (!window._firebaseReady) return;
-  try {
-    const { auth, signOut } = window._firebase;
-    await signOut(auth);
-    showToast('로그아웃 되었습니다');
-  } catch(e) {
-    showToast('로그아웃 실패', 'error');
-  }
-}
-
-// ══════════════════════════════════════════════
-//  LOCAL STORAGE
-// ══════════════════════════════════════════════
-function loadState() {
-  const saved = localStorage.getItem('portex_state');
-  if (saved) {
-    try { state = { ...state, ...JSON.parse(saved) }; } catch(e) {}
-  }
-  if (!state.accounts) state.accounts = [];
-  if (!state.assets)   state.assets   = [];
-}
-
-function saveState() {
-  localStorage.setItem('portex_state', JSON.stringify(state));
-  if (window._firebaseReady) syncToFirebase();
-}
-
-// ══════════════════════════════════════════════
-//  FIREBASE SYNC
-// ══════════════════════════════════════════════
-function getDocId() {
-  // 로그인된 경우 UID, 아니면 'local'
-  return window._currentUser ? window._currentUser.uid : 'local';
-}
-
-async function syncToFirebase() {
-  if (!window._firebaseReady) return;
-  if (!window._currentUser) return; // 로그인 필요
-  try {
-    const { db, doc, setDoc } = window._firebase;
-    await setDoc(doc(db, 'portfolios', getDocId()), {
-      accounts: state.accounts,
-      assets: state.assets,
-      updatedAt: new Date().toISOString()
+  window.sortAlpha = function() {
+    rows.sort((a, b) => {
+      if (!a.ticker && !b.ticker) return 0;
+      if (!a.ticker) return 1;
+      if (!b.ticker) return -1;
+      return a.ticker.localeCompare(b.ticker);
     });
-  } catch(e) { console.warn('Firebase sync failed:', e); }
-}
-
-async function syncFromFirebase() {
-  if (!window._firebaseReady) return;
-  if (!window._currentUser) return;
-  try {
-    const { db, doc, getDoc } = window._firebase;
-    const snap = await getDoc(doc(db, 'portfolios', getDocId()));
-    if (snap.exists()) {
-      const data = snap.data();
-      state.accounts = data.accounts || [];
-      state.assets   = data.assets   || [];
-      saveState();
-      renderAll();
-      showToast('Firebase에서 데이터 로드 완료', 'success');
-    }
-  } catch(e) { console.warn('Firebase read failed:', e); }
-}
-
-// ══════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════
-function setupTabs() {
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-      tab.classList.add('active');
-      const id = 'tab-' + tab.dataset.tab;
-      document.getElementById(id).style.display = 'block';
-      if (tab.dataset.tab === 'benchmark') updateBenchmarkUI();
-    });
-  });
-}
-
-// ══════════════════════════════════════════════
-//  ACCOUNTS
-// ══════════════════════════════════════════════
-function addAccount() {
-  const name = document.getElementById('acc-name').value.trim();
-  if (!name) { showToast('계좌명을 입력하세요', 'error'); return; }
-  const account = {
-    id: Date.now().toString(),
-    name,
-    type: document.getElementById('acc-type').value,
-    memo: document.getElementById('acc-memo').value
+    renderRows();
+    saveData();
   };
-  state.accounts.push(account);
-  saveState();
-  closeModal('addAccount');
-  renderAll();
-  showToast('계좌가 추가되었습니다', 'success');
-}
 
-// ══════════════════════════════════════════════
-//  ASSETS
-// ══════════════════════════════════════════════
-function addAsset(data) {
-  const asset = data || {
-    id: Date.now().toString(),
-    name:     document.getElementById('ast-name').value.trim(),
-    ticker:   document.getElementById('ast-ticker').value.trim().toUpperCase(),
-    type:     document.getElementById('ast-type').value,
-    accountId:document.getElementById('ast-account').value,
-    qty:      parseFloat(document.getElementById('ast-qty').value) || 0,
-    avgPrice: parseFloat(document.getElementById('ast-avg').value) || 0,
-    price:    parseFloat(document.getElementById('ast-price').value) || 0,
-    currency: document.getElementById('ast-currency').value,
-    addedAt:  new Date().toISOString()
+  window.deleteRow = function(i) {
+    if (rows.length > 1) { rows.splice(i, 1); renderRows(); saveData(); }
   };
-  if (!asset.name) { showToast('종목명을 입력하세요', 'error'); return; }
-  state.assets.push(asset);
-  saveState();
-  if (!data) { closeModal('addAsset'); }
-  renderAll();
-  showToast(`${asset.name} 추가됨`, 'success');
-}
 
-function deleteAsset(id) {
-  state.assets = state.assets.filter(a => a.id !== id);
-  saveState();
-  renderAll();
-  showToast('자산 삭제됨');
-}
-
-// ══════════════════════════════════════════════
-//  RENDER
-// ══════════════════════════════════════════════
-function renderAll() {
-  renderKPIs();
-  renderAccountSummary();
-  renderDashAssets();
-  renderAssetTable();
-  renderAccountFilters();
-  drawAllocChart();
-  updateAccountSelects();
-  updateSetupInfo();
-}
-
-function calcAssetValue(a) {
-  return a.qty * a.price;
-}
-
-function calcPnL(a) {
-  return a.qty * (a.price - a.avgPrice);
-}
-
-function calcPnLPct(a) {
-  if (!a.avgPrice) return 0;
-  return ((a.price - a.avgPrice) / a.avgPrice) * 100;
-}
-
-function fmtNum(n, digits=0) {
-  if (isNaN(n)) return '—';
-  return n.toLocaleString('ko-KR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-}
-
-function fmtCcy(n, ccy='KRW') {
-  if (ccy === 'USD') return '$' + fmtNum(n, 2);
-  return '₩' + fmtNum(n);
-}
-
-function renderKPIs() {
-  const assets = state.assets;
-  const total  = assets.reduce((s, a) => s + calcAssetValue(a), 0);
-  const cost   = assets.reduce((s, a) => s + (a.qty * a.avgPrice), 0);
-  const pnl    = total - cost;
-  const pnlPct = cost > 0 ? (pnl / cost * 100) : 0;
-
-  const stocks = assets.filter(a => ['stock','etf'].includes(a.type));
-  const cryptos= assets.filter(a => a.type === 'crypto');
-  const sVal   = stocks.reduce((s,a) => s + calcAssetValue(a), 0);
-  const cVal   = cryptos.reduce((s,a) => s + calcAssetValue(a), 0);
-
-  document.getElementById('kpi-total').textContent = '₩' + fmtNum(total);
-  document.getElementById('kpi-total-sub').textContent = assets.length + '개 자산';
-  document.getElementById('kpi-pnl').textContent = (pnl >= 0 ? '+' : '') + '₩' + fmtNum(Math.abs(pnl));
-  document.getElementById('kpi-pnl').className = 'kpi-value ' + (pnl >= 0 ? 'pos' : 'neg');
-  document.getElementById('kpi-pnl-pct').textContent = (pnl >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
-  document.getElementById('kpi-pnl-pct').className = 'kpi-sub ' + (pnl >= 0 ? 'pos' : 'neg');
-
-  const sPct = total > 0 ? (sVal / total * 100).toFixed(1) : 0;
-  const cPct = total > 0 ? (cVal / total * 100).toFixed(1) : 0;
-  document.getElementById('kpi-stock-pct').textContent = sPct + '%';
-  document.getElementById('kpi-stock-val').textContent = '₩' + fmtNum(sVal);
-  document.getElementById('kpi-crypto-pct').textContent = cPct + '%';
-  document.getElementById('kpi-crypto-val').textContent = '₩' + fmtNum(cVal);
-}
-
-function renderAccountSummary() {
-  const el = document.getElementById('accountSummary');
-  if (!state.accounts.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏦</div><div class="empty-text">계좌를 추가해 주세요</div></div>`;
-    return;
-  }
-  el.innerHTML = state.accounts.map(acc => {
-    const assets  = state.assets.filter(a => a.accountId === acc.id);
-    const total   = assets.reduce((s,a) => s + calcAssetValue(a), 0);
-    const pnl     = assets.reduce((s,a) => s + calcPnL(a), 0);
-    return `
-      <div style="display:flex;align-items:center;justify-content:space-between;
-                  padding:12px 0;border-bottom:1px solid var(--border)">
-        <div>
-          <div style="font-family:var(--font-head);font-weight:700;font-size:13px">${acc.name}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px">${assets.length}개 자산</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-family:var(--font-head);font-weight:700">₩${fmtNum(total)}</div>
-          <div style="font-size:11px;${pnl>=0?'color:var(--green)':'color:var(--red)'}">${pnl>=0?'+':''}₩${fmtNum(Math.abs(pnl))}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderDashAssets() {
-  const el = document.getElementById('dashAssetList');
-  if (!state.assets.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">자산을 추가하거나 AI 파싱으로 스크린샷을 업로드하세요</div></div>`;
-    return;
-  }
-  const sorted = [...state.assets].sort((a,b) => calcAssetValue(b) - calcAssetValue(a));
-  el.innerHTML = `
-    <table class="asset-table">
-      <thead><tr>
-        <th>종목명</th><th>유형</th><th>평가금액</th><th>손익</th><th>수익률</th>
-      </tr></thead>
-      <tbody>
-        ${sorted.map(a => {
-          const val  = calcAssetValue(a);
-          const pnl  = calcPnL(a);
-          const pct  = calcPnLPct(a);
-          const pos  = pnl >= 0;
-          const badge= badgeHTML(a.type);
-          return `<tr>
-            <td><div class="asset-name">${a.name}</div><div class="asset-ticker">${a.ticker||''}</div></td>
-            <td>${badge}</td>
-            <td style="font-family:var(--font-head);font-weight:700">₩${fmtNum(val)}</td>
-            <td class="${pos?'pos':'neg'}">${pos?'+':''}₩${fmtNum(Math.abs(pnl))}</td>
-            <td class="${pos?'pos':'neg'}">${pos?'+':''}${pct.toFixed(2)}%</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderAssetTable() {
-  const el = document.getElementById('assetTableBody');
-  let assets = activeAccountFilter === 'all'
-    ? state.assets
-    : state.assets.filter(a => a.accountId === activeAccountFilter);
-
-  if (!assets.length) {
-    el.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📈</div><div class="empty-text">자산이 없습니다</div></div></td></tr>`;
-    return;
-  }
-  el.innerHTML = assets.map(a => {
-    const val  = calcAssetValue(a);
-    const pnl  = calcPnL(a);
-    const pct  = calcPnLPct(a);
-    const pos  = pnl >= 0;
-    const acc  = state.accounts.find(ac => ac.id === a.accountId);
-    return `
-      <tr>
-        <td><div class="asset-name">${a.name}</div><div class="asset-ticker">${a.ticker||''}</div></td>
-        <td>${badgeHTML(a.type)}</td>
-        <td style="color:var(--muted);font-size:11px">${acc ? acc.name : '미지정'}</td>
-        <td>${fmtNum(a.qty, 4)}</td>
-        <td>₩${fmtNum(a.avgPrice)}</td>
-        <td>₩${fmtNum(a.price)}</td>
-        <td style="font-family:var(--font-head);font-weight:700">₩${fmtNum(val)}</td>
-        <td class="${pos?'pos':'neg'}">${pos?'+':''}${pct.toFixed(2)}%</td>
-        <td><button class="icon-btn" onclick="deleteAsset('${a.id}')">✕</button></td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function badgeHTML(type) {
-  const map = {
-    stock:  ['badge-stock','주식'],
-    etf:    ['badge-stock','ETF'],
-    crypto: ['badge-crypto','코인'],
-    cash:   ['badge-cash','현금'],
-    other:  ['badge-stock','기타'],
+  window.addRow = function() {
+    rows.push({ ticker: '', price: '', shares1: '' });
+    renderRows();
+    saveData();
   };
-  const [cls, lbl] = map[type] || ['badge-stock', type];
-  return `<span class="badge ${cls}">${lbl}</span>`;
-}
-
-function renderAccountFilters() {
-  const bar = document.getElementById('accountFilterBar');
-  const accountSelect = document.getElementById('aiTargetAccount');
-  bar.innerHTML = `<button class="filter-chip ${activeAccountFilter==='all'?'active':''}" data-account="all" onclick="filterAccount('all')">전체</button>`;
-  accountSelect.innerHTML = '<option value="">계좌 선택</option>';
-  state.accounts.forEach(acc => {
-    bar.innerHTML += `<button class="filter-chip ${activeAccountFilter===acc.id?'active':''}" data-account="${acc.id}" onclick="filterAccount('${acc.id}')">${acc.name}</button>`;
-    accountSelect.innerHTML += `<option value="${acc.id}">${acc.name}</option>`;
-  });
-}
-
-function filterAccount(id) {
-  activeAccountFilter = id;
-  renderAccountFilters();
-  renderAssetTable();
-}
-
-function updateAccountSelects() {
-  const sel = document.getElementById('ast-account');
-  sel.innerHTML = '<option value="">계좌 미지정</option>';
-  state.accounts.forEach(acc => {
-    sel.innerHTML += `<option value="${acc.id}">${acc.name}</option>`;
-  });
-}
-
-function updateSetupInfo() {
-  document.getElementById('assetCount').textContent = state.assets.length;
-  document.getElementById('accountCount').textContent = state.accounts.length;
-  document.getElementById('storageInfo').textContent = window._firebaseReady ? 'Firebase' : '로컬';
-}
-
-// ══════════════════════════════════════════════
-//  DONUT CHART
-// ══════════════════════════════════════════════
-function drawAllocChart() {
-  const canvas = document.getElementById('allocChart');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const assets = state.assets;
-  if (!assets.length) {
-    ctx.fillStyle = '#2a2a38';
-    ctx.beginPath(); ctx.arc(130,130,100,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#0a0a0f';
-    ctx.beginPath(); ctx.arc(130,130,60,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#6b6b7e'; ctx.font = '12px Space Mono'; ctx.textAlign = 'center';
-    ctx.fillText('데이터 없음', 130, 134);
-    return;
-  }
-
-  const COLORS = ['#00e5ff','#7c3aed','#00ff88','#ffd84d','#ff4455','#ff6b9d','#4dbbff','#a855f7'];
-  const total = assets.reduce((s,a) => s + calcAssetValue(a), 0);
-
-  // Group by type
-  const groups = {};
-  assets.forEach(a => {
-    const t = a.type; const v = calcAssetValue(a);
-    groups[t] = (groups[t] || 0) + v;
-  });
-  const entries = Object.entries(groups).sort((a,b) => b[1]-a[1]);
-
-  let startAngle = -Math.PI / 2;
-  entries.forEach(([type, val], i) => {
-    const slice = (val / total) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(130, 130);
-    ctx.arc(130, 130, 105, startAngle, startAngle + slice);
-    ctx.closePath();
-    ctx.fillStyle = COLORS[i % COLORS.length];
-    ctx.fill();
-    startAngle += slice;
-  });
-
-  // Inner hole
-  ctx.beginPath(); ctx.arc(130,130,62,0,Math.PI*2);
-  ctx.fillStyle = '#0a0a0f'; ctx.fill();
-
-  // Center text
-  ctx.fillStyle = '#e8e8f0'; ctx.font = 'bold 14px Syne'; ctx.textAlign = 'center';
-  ctx.fillText(fmtNum(total) , 130, 126);
-  ctx.fillStyle = '#6b6b7e'; ctx.font = '10px Space Mono';
-  ctx.fillText('총 자산', 130, 143);
-
-  // Legend
-  const legend = document.getElementById('allocLegend');
-  const typeLabel = { stock:'주식',etf:'ETF',crypto:'코인',cash:'현금',other:'기타' };
-  legend.innerHTML = entries.map(([t,v],i) => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div>
-      <span style="color:var(--muted)">${typeLabel[t]||t}</span>
-      <span>${total>0?(v/total*100).toFixed(1):'0'}%</span>
-    </div>
-  `).join('');
-}
-
-// ══════════════════════════════════════════════
-//  BENCHMARK
-// ══════════════════════════════════════════════
-let benchData = { sp: null, nq: null };
-
-async function fetchBenchmarkData() {
-  // Use allorigins CORS proxy to fetch Yahoo Finance
-  const tickers = ['SPY', 'QQQ'];
-  const now  = Math.floor(Date.now() / 1000);
-  const from = now - 35 * 86400; // ~35 days
-
-  for (const ticker of tickers) {
-    try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&period1=${from}&period2=${now}`;
-      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-      const res = await fetch(proxy);
-      const json = await res.json();
-      const data = JSON.parse(json.contents);
-      const closes = data.chart.result[0].indicators.quote[0].close;
-      const valid  = closes.filter(v => v != null);
-      if (valid.length >= 2) {
-        const pct = (valid[valid.length-1] - valid[0]) / valid[0] * 100;
-        if (ticker === 'SPY') benchData.sp = pct;
-        else                  benchData.nq = pct;
-      }
-    } catch(e) {
-      console.warn(`Failed to fetch ${ticker}:`, e);
-    }
-  }
-  updateBenchmarkUI();
-}
-
-function updateBenchmarkUI() {
-  const assets = state.assets;
-  const total  = assets.reduce((s,a) => s + calcAssetValue(a), 0);
-  const cost   = assets.reduce((s,a) => s + (a.qty * a.avgPrice), 0);
-  const myPct  = cost > 0 ? (total - cost) / cost * 100 : null;
-
-  const fmt = v => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
-  const cls = v => v == null ? '' : v >= 0 ? 'pos' : 'neg';
-
-  // KPI
-  const myEl = document.getElementById('bench-my');
-  myEl.textContent = fmt(myPct);
-  myEl.className   = 'kpi-value ' + cls(myPct);
-
-  const spEl = document.getElementById('bench-sp');
-  spEl.textContent = fmt(benchData.sp);
-  spEl.className   = 'kpi-value ' + cls(benchData.sp);
-  document.getElementById('bench-sp-sub').textContent = benchData.sp != null ? 'SPY ETF 기준' : '로드 실패';
-
-  const nqEl = document.getElementById('bench-nq');
-  nqEl.textContent = fmt(benchData.nq);
-  nqEl.className   = 'kpi-value ' + cls(benchData.nq);
-  document.getElementById('bench-nq-sub').textContent = benchData.nq != null ? 'QQQ ETF 기준' : '로드 실패';
-
-  const alpha = (myPct != null && benchData.sp != null) ? myPct - benchData.sp : null;
-  const alphaEl = document.getElementById('bench-alpha');
-  alphaEl.textContent = fmt(alpha);
-  alphaEl.className   = 'kpi-value ' + cls(alpha);
-
-  // Bar chart
-  const vals = [myPct, benchData.sp, benchData.nq];
-  const max  = Math.max(...vals.filter(v => v != null).map(Math.abs), 1);
-  const ids  = ['my', 'sp', 'nq'];
-  ids.forEach((id, i) => {
-    const v = vals[i];
-    document.getElementById('bv-' + id).textContent = fmt(v);
-    document.getElementById('bv-' + id).className   = cls(v);
-    document.getElementById('bb-' + id).style.width = v != null ? Math.abs(v)/max*80 + '%' : '0%';
-  });
-
-  // Mini chart
-  drawBenchChart(myPct, benchData.sp, benchData.nq);
-}
-
-function drawBenchChart(my, sp, nq) {
-  const canvas = document.getElementById('benchChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 600;
-  canvas.height = 220;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const vals = [
-    { label: '내 포트폴리오', val: my,  color: '#00e5ff' },
-    { label: 'S&P 500 (SPY)', val: sp,  color: '#00ff88' },
-    { label: 'NASDAQ (QQQ)',  val: nq,  color: '#ffd84d' },
-  ].filter(d => d.val != null);
-
-  if (!vals.length) {
-    ctx.fillStyle = '#6b6b7e'; ctx.font = '12px Space Mono'; ctx.textAlign = 'center';
-    ctx.fillText('데이터 없음', canvas.width/2, 110);
-    return;
-  }
-
-  const W = canvas.width; const H = 200;
-  const barW = Math.min(120, (W - 80) / vals.length - 20);
-  const gapX = (W - vals.length * barW) / (vals.length + 1);
-  const minV = Math.min(...vals.map(d=>d.val), 0);
-  const maxV = Math.max(...vals.map(d=>d.val), 0.01);
-  const zeroY = H * 0.7;
-  const scale = zeroY / Math.max(Math.abs(minV), maxV, 0.01);
-
-  // Zero line
-  ctx.strokeStyle = '#2a2a38'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(W, zeroY); ctx.stroke();
-
-  vals.forEach((d, i) => {
-    const x   = gapX + i * (barW + gapX);
-    const barH= Math.abs(d.val) * scale;
-    const y   = d.val >= 0 ? zeroY - barH : zeroY;
-    ctx.fillStyle = d.color + '33';
-    ctx.fillRect(x, y, barW, barH);
-    ctx.strokeStyle = d.color;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, barW, barH);
-
-    // Value label
-    ctx.fillStyle = d.color;
-    ctx.font = 'bold 13px Space Mono';
-    ctx.textAlign = 'center';
-    const vStr = (d.val >= 0 ? '+' : '') + d.val.toFixed(2) + '%';
-    ctx.fillText(vStr, x + barW/2, d.val >= 0 ? y - 6 : y + barH + 16);
-
-    // Name label
-    ctx.fillStyle = '#6b6b7e'; ctx.font = '10px Space Mono';
-    ctx.fillText(d.label, x + barW/2, H + 18);
-  });
-}
-
-// ══════════════════════════════════════════════
-//  AI PARSING
-// ══════════════════════════════════════════════
-function setupDrag() {
-  const zone = document.getElementById('uploadZone');
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault(); zone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) processImageFile(file);
-  });
-  document.getElementById('fileInput').addEventListener('change', e => {
-    if (e.target.files[0]) processImageFile(e.target.files[0]);
-  });
-}
-
-async function processImageFile(file) {
-  const spinner  = document.getElementById('aiSpinner');
-  const loadBar  = document.getElementById('aiLoadingBar');
-  const resultEl = document.getElementById('aiResult');
-  const textEl   = document.getElementById('aiResultText');
-  const parsedEl = document.getElementById('parsedAssets');
-  const parsedActEl = document.getElementById('parsedActions');
-  const parsedEmpty = document.getElementById('parsedEmpty');
-
-  spinner.style.display = 'inline-block';
-  loadBar.style.display  = 'block';
-  resultEl.classList.add('visible');
-  textEl.textContent = 'Claude AI가 이미지를 분석 중입니다...';
-  parsedEl.classList.remove('visible');
-  parsedActEl.style.display = 'none';
-  parsedEmpty.style.display = 'none';
-  parsedAssetsData = [];
-
-  // Convert to base64
-  const base64 = await fileToBase64(file);
-  const mediaType = file.type || 'image/jpeg';
-
-  const prompt = `이 이미지는 증권사 앱 또는 암호화폐 거래소의 포트폴리오/자산 스크린샷입니다.
-이미지에서 보이는 모든 자산 정보를 추출해 JSON 배열로 반환해주세요.
-
-반드시 아래 형식의 JSON만 반환하세요 (다른 텍스트 없이):
-[
-  {
-    "name": "종목명 또는 코인명",
-    "ticker": "티커/심볼 (없으면 빈 문자열)",
-    "type": "stock 또는 crypto 또는 etf 또는 cash",
-    "qty": 보유수량(숫자),
-    "avgPrice": 평균매입단가(숫자, 없으면 0),
-    "price": 현재가(숫자, 없으면 0),
-    "currency": "KRW 또는 USD 또는 BTC 등"
-  }
-]
-
-- 금액에서 쉼표, 원, $, ₩ 등 단위 제거 후 순수 숫자만
-- 이미지에 정보가 없으면 빈 배열 [] 반환
-- JSON 외 아무것도 출력하지 마세요`;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
-
-    const data = await response.json();
-    const raw  = data.content?.map(c => c.text || '').join('').trim();
-    textEl.textContent = raw;
-
-    // Parse JSON
-    try {
-      const clean  = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        parsedAssetsData = parsed;
-        renderParsedAssets(parsed);
-        parsedEl.classList.add('visible');
-        parsedActEl.style.display = 'block';
-        document.getElementById('parsedCount').textContent = `(${parsed.length}개)`;
-        showToast(`${parsed.length}개 자산 파싱 완료`, 'success');
-      } else {
-        document.getElementById('noParsedMsg').style.display = 'block';
-        parsedEmpty.style.display = 'block';
-      }
-    } catch(e) {
-      document.getElementById('noParsedMsg').style.display = 'block';
-      parsedEmpty.style.display = 'block';
-    }
-  } catch(err) {
-    textEl.textContent = '오류: ' + err.message;
-    showToast('AI 파싱 실패: ' + err.message, 'error');
-  } finally {
-    spinner.style.display = 'none';
-    loadBar.style.display = 'none';
-  }
-}
-
-function renderParsedAssets(assets) {
-  const el = document.getElementById('parsedAssets');
-  el.innerHTML = assets.map((a, i) => `
-    <div class="parsed-asset-row" id="parsed-row-${i}">
-      <input value="${a.name||''}" placeholder="종목명" onchange="parsedAssetsData[${i}].name=this.value">
-      <select onchange="parsedAssetsData[${i}].type=this.value">
-        <option value="stock" ${a.type==='stock'?'selected':''}>주식</option>
-        <option value="crypto" ${a.type==='crypto'?'selected':''}>코인</option>
-        <option value="etf" ${a.type==='etf'?'selected':''}>ETF</option>
-        <option value="cash" ${a.type==='cash'?'selected':''}>현금</option>
-      </select>
-      <input type="number" value="${a.qty||0}" placeholder="수량" onchange="parsedAssetsData[${i}].qty=parseFloat(this.value)||0">
-      <input type="number" value="${a.price||0}" placeholder="현재가" onchange="parsedAssetsData[${i}].price=parseFloat(this.value)||0">
-      <button class="icon-btn" onclick="removeParsedRow(${i})">✕</button>
-    </div>
-  `).join('');
-}
-
-function removeParsedRow(i) {
-  parsedAssetsData.splice(i, 1);
-  renderParsedAssets(parsedAssetsData);
-  if (!parsedAssetsData.length) {
-    document.getElementById('parsedAssets').classList.remove('visible');
-    document.getElementById('parsedActions').style.display = 'none';
-    document.getElementById('parsedEmpty').style.display = 'block';
-  }
-}
-
-function importParsedAssets() {
-  const targetAccId = document.getElementById('aiTargetAccount').value;
-  parsedAssetsData.forEach(a => {
-    state.assets.push({
-      id:        Date.now().toString() + Math.random().toString(36).slice(2),
-      name:      a.name || '알 수 없음',
-      ticker:    a.ticker || '',
-      type:      a.type || 'stock',
-      accountId: targetAccId,
-      qty:       a.qty || 0,
-      avgPrice:  a.avgPrice || 0,
-      price:     a.price || 0,
-      currency:  a.currency || 'KRW',
-      addedAt:   new Date().toISOString()
-    });
-  });
-  saveState();
-  renderAll();
-  parsedAssetsData = [];
-  document.getElementById('parsedAssets').classList.remove('visible');
-  document.getElementById('parsedActions').style.display = 'none';
-  document.getElementById('parsedEmpty').style.display = 'block';
-  showToast('포트폴리오에 추가되었습니다', 'success');
-}
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload  = () => resolve(r.result.split(',')[1]);
-    r.onerror = () => reject(new Error('파일 읽기 실패'));
-    r.readAsDataURL(file);
-  });
-}
-
-// ══════════════════════════════════════════════
-//  MODAL HELPERS
-// ══════════════════════════════════════════════
-function openModal(id) {
-  document.getElementById('modal-' + id).classList.add('open');
-}
-function closeModal(id) {
-  document.getElementById('modal-' + id).classList.remove('open');
-}
-// Close on overlay click
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
-});
-
-// ══════════════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════════════
-function showToast(msg, type='') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className   = 'toast ' + type + ' show';
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-// ══════════════════════════════════════════════
-//  FIREBASE CONFIG SAVE
-// ══════════════════════════════════════════════
-function saveFirebaseConfig() {
-  const cfg = {
-    apiKey:    document.getElementById('cfg-apiKey').value.trim(),
-    projectId: document.getElementById('cfg-projectId').value.trim(),
-    authDomain:document.getElementById('cfg-authDomain').value.trim(),
-    appId:     document.getElementById('cfg-appId').value.trim(),
-  };
-  localStorage.setItem('fbConfig', JSON.stringify(cfg));
-  showToast('저장됨 — 페이지를 새로고침해 주세요', 'success');
-}
-
-// ══════════════════════════════════════════════
-//  IMPORT / EXPORT
-// ══════════════════════════════════════════════
-function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'portex-backup-' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  showToast('내보내기 완료', 'success');
-}
-
-function importData(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const r = new FileReader();
-  r.onload = () => {
-    try {
-      const data = JSON.parse(r.result);
-      state = { ...state, ...data };
-      saveState();
-      renderAll();
-      showToast('데이터 가져오기 완료', 'success');
-    } catch(err) { showToast('JSON 파싱 오류', 'error'); }
-  };
-  r.readAsText(file);
-}
-
-function clearAllData() {
-  if (!confirm('모든 데이터를 초기화하시겠습니까?')) return;
-  state = { accounts: [], assets: [] };
-  saveState();
-  renderAll();
-  showToast('초기화 완료');
-}
 </script>
 </body>
 </html>
