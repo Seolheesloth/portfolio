@@ -81,6 +81,18 @@
   .result-shares.purple { color: #7a1a6a; }
   .result-shares.empty  { font-size: 12px; font-weight: 400; color: #bbb; }
 
+  /* 현재 보유 입력 + 델타 */
+  .held-wrap { display: flex; align-items: center; gap: 4px; margin-top: 7px; }
+  .held-label { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #aaa; }
+  .held-input { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; background: transparent; border: none; border-bottom: 1px dashed #ccc; outline: none; color: #555; width: 60px; padding: 1px 0; }
+  .held-input:focus { border-bottom-color: #1a1a1a; color: #111; }
+  .held-input::placeholder { color: #ddd; }
+  .delta { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 700; margin-top: 5px; display: block; letter-spacing: -0.3px; }
+  .delta.buy  { color: #1a7a4a; }
+  .delta.sell { color: #d11a2a; }
+  .delta.flat { color: #aaa; font-size: 12px; font-weight: 500; }
+  .delta-note { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #bbb; }
+
   .row-cash td { border-bottom: 1.5px solid #1a1a1a; padding: 10px 14px; vertical-align: middle; }
   .row-cash .c-ticker { background: #fffbea; border-right: 1.5px solid #1a1a1a; }
   .row-cash .c-acct1  { background: #fffbea; border-right: 1px solid #e8dfa0; }
@@ -336,11 +348,11 @@
   const FINNHUB_KEY = 'd803iupr01qj3ct8tn40d803iupr01qj3ct8tn4g';
 
   const DEFAULT_ROWS = [
-    { ticker: 'AAPL', price: '', shares1: '10' },
-    { ticker: 'NVDA', price: '', shares1: '5'  },
-    { ticker: 'MSFT', price: '', shares1: '8'  },
-    { ticker: 'TSLA', price: '', shares1: '15' },
-    { ticker: '',     price: '', shares1: ''   },
+    { ticker: 'AAPL', price: '', shares1: '10', shares2: '', shares3: '' },
+    { ticker: 'NVDA', price: '', shares1: '5',  shares2: '', shares3: '' },
+    { ticker: 'MSFT', price: '', shares1: '8',  shares2: '', shares3: '' },
+    { ticker: 'TSLA', price: '', shares1: '15', shares2: '', shares3: '' },
+    { ticker: '',     price: '', shares1: '',   shares2: '', shares3: '' },
   ];
 
   window.rows = [];
@@ -420,6 +432,7 @@
         const sub  = document.getElementById(`sub${n}-${i}`);
         const pctEl= document.getElementById(`pct${n}-${i}`);
         if (!res) return;
+        const deltaEl = document.getElementById(`delta${n}-${i}`);
         if (budget > 0 && price > 0 && pct > 0) {
           const tv  = pct * budget;
           const shs = tv / price;
@@ -428,11 +441,33 @@
           res.innerHTML = `${shs.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
           if (sub)   sub.textContent  = fmt$(tv);
           if (pctEl) pctEl.textContent= (pct*100).toFixed(1)+'%';
+
+          // 델타 계산: 목표 - 현재 보유
+          if (deltaEl) {
+            const held  = parseFloat(r['shares' + n]);
+            if (isNaN(held)) {
+              deltaEl.className = 'delta flat';
+              deltaEl.innerHTML = '';
+            } else {
+              const delta = shs - held;
+              if (Math.abs(delta) < 0.005) {
+                deltaEl.className = 'delta flat';
+                deltaEl.innerHTML = '✓ 일치';
+              } else if (delta > 0) {
+                deltaEl.className = 'delta buy';
+                deltaEl.innerHTML = `+${delta.toFixed(2)} <span class="delta-note">매수</span>`;
+              } else {
+                deltaEl.className = 'delta sell';
+                deltaEl.innerHTML = `−${Math.abs(delta).toFixed(2)} <span class="delta-note">매도</span>`;
+              }
+            }
+          }
         } else {
           res.className = 'result-shares empty';
           res.textContent = budget > 0 ? '—' : 'Enter budget →';
           if (sub)   sub.textContent  = '';
           if (pctEl) pctEl.textContent= '';
+          if (deltaEl) { deltaEl.className = 'delta flat'; deltaEl.innerHTML = ''; }
         }
       });
     });
@@ -480,6 +515,11 @@
     recalc();
     saveData();
   };
+  window.updateHeld = function(i, acct, val) {
+    rows[i]['shares' + acct] = val;
+    recalc();
+    saveData();
+  };
 
   // ── Render rows ──
   window.renderRows = function() {
@@ -519,6 +559,13 @@
             <span id="sub2-${i}"></span>
             <span class="badge badge-green" id="pct2-${i}"></span>
           </div>
+          <div class="held-wrap">
+            <span class="held-label">보유</span>
+            <input class="held-input" type="number" placeholder="0" step="0.001"
+              value="${r.shares2 || ''}"
+              oninput="updateHeld(${i},'2',this.value)">
+          </div>
+          <span class="delta flat" id="delta2-${i}"></span>
         </td>
         <td class="c-acct3">
           <span class="result-shares purple empty" id="res3-${i}">Enter budget →</span>
@@ -526,6 +573,13 @@
             <span id="sub3-${i}"></span>
             <span class="badge badge-purple" id="pct3-${i}"></span>
           </div>
+          <div class="held-wrap">
+            <span class="held-label">보유</span>
+            <input class="held-input" type="number" placeholder="0" step="0.001"
+              value="${r.shares3 || ''}"
+              oninput="updateHeld(${i},'3',this.value)">
+          </div>
+          <span class="delta flat" id="delta3-${i}"></span>
         </td>
       `;
       cashRow.insertAdjacentElement('beforebegin', tr);
@@ -587,7 +641,7 @@
   };
 
   window.addRow = function() {
-    rows.push({ ticker: '', price: '', shares1: '' });
+    rows.push({ ticker: '', price: '', shares1: '', shares2: '', shares3: '' });
     renderRows();
     saveData();
   };
