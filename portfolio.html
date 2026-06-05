@@ -24,39 +24,44 @@
   .row-header th { padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; border-bottom: 1.5px solid #1a1a1a; text-align: left; }
   .row-header .c-ticker { background: #1a1a1a; border-right: 1.5px solid #1a1a1a; }
   .row-header .c-acct1  { background: #1a3fa8; border-right: 1px solid rgba(255,255,255,0.2); }
-  .row-header .c-acct2  { background: #1a7a4a; border-right: 1px solid rgba(255,255,255,0.2); }
+  .row-header .c-acct2  { background: #5c3815; border-right: 1px solid rgba(255,255,255,0.2); }
   .row-header .c-acct3  { background: #7a1a6a; }
 
   .row-summary td { border-bottom: 1.5px solid #1a1a1a; padding: 14px; vertical-align: middle; }
   .row-summary .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
   .row-summary .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
-  .row-summary .c-acct2  { background: #f2faf6; border-right: 1px solid #ddd; }
+  .row-summary .c-acct2  { background: #faf6f0; border-right: 1px solid #ddd; }
   .row-summary .c-acct3  { background: #faf2f9; }
 
   .s-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
   .s-value { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
   .s-value.blue   { color: #1a3fa8; }
-  .s-value.green  { color: #1a7a4a; }
+  .s-value.green  { color: #8a5320; }
   .s-value.purple { color: #7a1a6a; }
   .budget-wrap { display: flex; align-items: center; gap: 1px; }
-  .budget-dollar-green  { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #1a7a4a; }
+  .budget-dollar-green  { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #8a5320; }
   .budget-dollar-purple { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #7a1a6a; }
   .budget-input { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; background: transparent; border: none; outline: none; width: 100%; padding: 0; }
-  .budget-input.green  { color: #1a7a4a; }
+  .budget-input.green  { color: #8a5320; }
   .budget-input.purple { color: #7a1a6a; }
-  .budget-input.green::placeholder  { color: #a0c8b8; font-weight: 400; font-size: 16px; }
+  .budget-input.green::placeholder  { color: #c8a888; font-weight: 400; font-size: 16px; }
   .budget-input.purple::placeholder { color: #c8a0c4; font-weight: 400; font-size: 16px; }
   .s-note { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-top: 5px; }
-  .s-note.green  span { color: #1a7a4a; }
+  .s-note.green  span { color: #8a5320; }
   .s-note.purple span { color: #7a1a6a; }
   .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
   .auto-cash-label { font-size: 11px; color: #777; display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
   .auto-cash-label input { cursor: pointer; }
+  .control-bar { max-width: 1100px; margin: 0 auto 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .control-bar .btn { font-size: 12px; }
+  .auto-toggle { font-size: 9px; font-weight: 500; text-transform: none; letter-spacing: 0; color: #999; margin-left: 6px; cursor: pointer; }
+  .auto-toggle input { cursor: pointer; vertical-align: middle; }
+  .budget-input:read-only { color: #888; }
 
   .row-stock td { border-bottom: 1px solid #e8e8e8; padding: 10px 14px; vertical-align: middle; }
   .row-stock .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
   .row-stock .c-acct1  { background: #fff;    border-right: 1px solid #e8e8e8; }
-  .row-stock .c-acct2  { background: #f2faf6; border-right: 1px solid #e8e8e8; }
+  .row-stock .c-acct2  { background: #faf6f0; border-right: 1px solid #e8e8e8; }
   .row-stock .c-acct3  { background: #faf2f9; }
 
   .ticker-input { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; background: transparent; border: none; outline: none; color: #111; width: 100%; text-transform: uppercase; display: block; margin-bottom: 5px; }
@@ -75,11 +80,11 @@
   .cell-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #888; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .badge { font-size: 13px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
   .badge-blue   { background: #edf1fb; color: #1a3fa8; }
-  .badge-green  { background: #edf7f2; color: #1a7a4a; }
+  .badge-green  { background: #f5ece0; color: #8a5320; }
   .badge-purple { background: #f7edf6; color: #7a1a6a; }
 
   .result-shares { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; display: block; margin-bottom: 6px; }
-  .result-shares.green  { color: #1a7a4a; }
+  .result-shares.green  { color: #8a5320; }
   .result-shares.purple { color: #7a1a6a; }
   .result-shares.empty  { font-size: 12px; font-weight: 400; color: #bbb; }
 
@@ -98,7 +103,7 @@
   .row-cash td { border-bottom: 1.5px solid #1a1a1a; padding: 10px 14px; vertical-align: middle; }
   .row-cash .c-ticker { background: #fffbea; border-right: 1.5px solid #1a1a1a; }
   .row-cash .c-acct1  { background: #fffbea; border-right: 1px solid #e8dfa0; }
-  .row-cash .c-acct2  { background: #f4fbf0; border-right: 1px solid #e8e8e8; }
+  .row-cash .c-acct2  { background: #faf6f0; border-right: 1px solid #e8e8e8; }
   .row-cash .c-acct3  { background: #fbf0fa; }
   .cash-input { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; background: transparent; border: none; border-bottom: 1.5px solid transparent; outline: none; color: #111; width: 100%; padding: 1px 0; display: block; margin-bottom: 6px; }
   .cash-input:focus { border-bottom-color: #8a7a00; }
@@ -116,11 +121,8 @@
   .btn-sort:hover    { background: #555; color: white; }
   .btn-refresh { border-color: #1a7a4a; color: #1a7a4a; }
   .btn-refresh:hover { background: #1a7a4a; color: white; }
-  .btn-record { font-size: 11px; display: block; width: 100%; }
-  .btn-record.green  { border-color: #1a7a4a; color: #1a7a4a; }
-  .btn-record.green:hover  { background: #1a7a4a; color: white; }
-  .btn-record.purple { border-color: #7a1a6a; color: #7a1a6a; }
-  .btn-record.purple:hover { background: #7a1a6a; color: white; }
+  .btn-record { border-color: #5c3815; color: #5c3815; }
+  .btn-record:hover { background: #5c3815; color: white; }
 
   .header-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.3); outline: none; width: 100%; padding: 1px 0; cursor: text; }
 
@@ -140,6 +142,13 @@
   <label class="auto-cash-label">
     <input type="checkbox" id="auto-cash-toggle" checked> 주식 변경 시 현금 자동 반영
   </label>
+</div>
+
+<div class="control-bar">
+  <button class="btn" onclick="addRow()">+ 종목 추가</button>
+  <button class="btn btn-sort" onclick="sortAlpha()">A→Z 정렬</button>
+  <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ 가격 갱신</button>
+  <button class="btn btn-record" id="snapshot-btn" onclick="snapshotAll()">📌 보유기록</button>
 </div>
 
 <table>
@@ -162,29 +171,26 @@
       <td class="c-ticker">
         <div style="font-size:11px;color:#aaa;font-family:monospace">—</div>
         <div class="last-updated" id="last-updated"></div>
-        <button class="btn btn-sort" onclick="sortAlpha()" style="margin-top:8px;width:100%;">A→Z Sort</button>
       </td>
       <td class="c-acct1">
         <div class="s-label">Total Value</div>
         <div class="s-value blue" id="acct1-total">$0.00</div>
       </td>
       <td class="c-acct2">
-        <div class="s-label">Target Budget</div>
+        <div class="s-label">Total Value <label class="auto-toggle"><input type="checkbox" id="auto2" checked onchange="recalc();saveData()"> 자동</label></div>
         <div class="budget-wrap">
           <span class="budget-dollar-green">$</span>
-          <input type="number" id="acct2-budget" class="budget-input green" placeholder="10000" oninput="recalc();saveData()">
+          <input type="number" id="acct2-budget" class="budget-input green" placeholder="자동 계산" oninput="recalc();saveData()">
         </div>
         <div class="s-note green">Allocated: <span id="acct2-allocated">$0.00</span></div>
-        <button class="btn btn-record green" onclick="snapshotHeld('2')" style="margin-top:8px;">📌 현재 목표를 보유로 기록</button>
       </td>
       <td class="c-acct3">
-        <div class="s-label">Target Budget</div>
+        <div class="s-label">Total Value <label class="auto-toggle"><input type="checkbox" id="auto3" checked onchange="recalc();saveData()"> 자동</label></div>
         <div class="budget-wrap">
           <span class="budget-dollar-purple">$</span>
-          <input type="number" id="acct3-budget" class="budget-input purple" placeholder="10000" oninput="recalc();saveData()">
+          <input type="number" id="acct3-budget" class="budget-input purple" placeholder="자동 계산" oninput="recalc();saveData()">
         </div>
         <div class="s-note purple">Allocated: <span id="acct3-allocated">$0.00</span></div>
-        <button class="btn btn-record purple" onclick="snapshotHeld('3')" style="margin-top:8px;">📌 현재 목표를 보유로 기록</button>
       </td>
     </tr>
 
@@ -204,25 +210,25 @@
         </div>
       </td>
       <td class="c-acct2">
-        <div class="result-shares green empty" id="cash2-amount">Enter budget →</div>
+        <div class="result-shares green empty" id="cash2-amount">목표 →</div>
         <div class="cell-sub"><span class="badge badge-green" id="cash2-pct"></span></div>
+        <div class="held-wrap">
+          <span class="held-label">보유$</span>
+          <input class="held-input" type="number" id="cash2-held" placeholder="0" step="0.01"
+            oninput="recalc();saveData()">
+        </div>
       </td>
       <td class="c-acct3">
-        <div class="result-shares purple empty" id="cash3-amount">Enter budget →</div>
+        <div class="result-shares purple empty" id="cash3-amount">목표 →</div>
         <div class="cell-sub"><span class="badge badge-purple" id="cash3-pct"></span></div>
+        <div class="held-wrap">
+          <span class="held-label">보유$</span>
+          <input class="held-input" type="number" id="cash3-held" placeholder="0" step="0.01"
+            oninput="recalc();saveData()">
+        </div>
       </td>
     </tr>
 
-    <tr class="row-footer">
-      <td class="c-ticker">
-        <button class="btn" onclick="addRow()">+ Add</button>
-      </td>
-      <td class="c-acct1"></td>
-      <td class="c-acct2">
-        <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ Refresh Prices</button>
-      </td>
-      <td class="c-acct3"></td>
-    </tr>
   </tbody>
 </table>
 
@@ -348,6 +354,10 @@
       if (data.budget2) document.getElementById('acct2-budget').value = data.budget2;
       if (data.budget3) document.getElementById('acct3-budget').value = data.budget3;
       if (data.cash1)   document.getElementById('cash1').value = data.cash1;
+      if (data.cash2)   document.getElementById('cash2-held').value = data.cash2;
+      if (data.cash3)   document.getElementById('cash3-held').value = data.cash3;
+      if (data.auto2 !== undefined) document.getElementById('auto2').checked = data.auto2;
+      if (data.auto3 !== undefined) document.getElementById('auto3').checked = data.auto3;
       if (data.h1)      document.getElementById('h-acct1').value = data.h1;
       if (data.h2)      document.getElementById('h-acct2').value = data.h2;
       if (data.h3)      document.getElementById('h-acct3').value = data.h3;
@@ -390,6 +400,10 @@
           budget2: document.getElementById('acct2-budget').value,
           budget3: document.getElementById('acct3-budget').value,
           cash1:   document.getElementById('cash1').value,
+          cash2:   document.getElementById('cash2-held').value,
+          cash3:   document.getElementById('cash3-held').value,
+          auto2:   document.getElementById('auto2').checked,
+          auto3:   document.getElementById('auto3').checked,
           h1:      document.getElementById('h-acct1').value,
           h2:      document.getElementById('h-acct2').value,
           h3:      document.getElementById('h-acct3').value,
@@ -421,8 +435,35 @@
   }
 
   // ── Recalc ──
+  // 특정 계좌의 실제 보유 자산 합 = Σ(보유주식 × 현재가) + 보유현금
+  function accountTotal(acct) {
+    let sum = 0;
+    rows.forEach(r => {
+      const held = parseFloat(r['shares' + acct]);
+      const price = parseFloat(r.price);
+      if (!isNaN(held) && !isNaN(price)) sum += held * price;
+    });
+    const cashEl = document.getElementById('cash' + acct + '-held');
+    sum += parseFloat(cashEl ? cashEl.value : 0) || 0;
+    return sum;
+  }
+
   window.recalc = function() {
     const total1  = getTotal1();
+
+    // Account 2,3 budget: 자동이면 실제 보유 자산 합으로 채움
+    ['2','3'].forEach(acct => {
+      const autoEl   = document.getElementById('auto' + acct);
+      const budgetEl = document.getElementById('acct' + acct + '-budget');
+      if (autoEl && autoEl.checked) {
+        const auto = accountTotal(acct);
+        budgetEl.value = auto > 0 ? auto.toFixed(2) : '';
+        budgetEl.readOnly = true;
+      } else if (budgetEl) {
+        budgetEl.readOnly = false;
+      }
+    });
+
     const budget2 = parseFloat(document.getElementById('acct2-budget').value) || 0;
     const budget3 = parseFloat(document.getElementById('acct3-budget').value) || 0;
     document.getElementById('acct1-total').textContent = fmt$(total1);
@@ -571,20 +612,23 @@
     saveData();
   };
 
-  // 현재 계산된 목표 주식수를 "보유"로 일괄 저장 (스냅샷)
-  window.snapshotHeld = function(acct) {
-    let count = 0;
-    rows.forEach(r => {
-      const t = r['_target' + acct];
-      if (t != null && !isNaN(t)) {
-        r['shares' + acct] = t.toFixed(2);
-        count++;
-      }
+  // 현재 계산된 목표 주식수를 "보유"로 일괄 저장 (Account 2,3 모두, 팝업 없음)
+  window.snapshotAll = function() {
+    ['2','3'].forEach(acct => {
+      rows.forEach(r => {
+        const t = r['_target' + acct];
+        if (t != null && !isNaN(t)) r['shares' + acct] = t.toFixed(2);
+      });
     });
     renderRows();
     saveData();
-    const label = acct === '2' ? 'Account 2' : 'Account 3';
-    alert(`✓ ${label}의 현재 목표 ${count}개 종목을 보유량으로 기록했습니다.\n이제 Account 1을 변경하면 매매 수량이 자동 표시됩니다.`);
+    // 버튼에 잠깐 피드백
+    const btn = document.getElementById('snapshot-btn');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✓ 기록됨';
+      setTimeout(() => { btn.textContent = orig; }, 1200);
+    }
   };
 
   // ── Render rows ──
