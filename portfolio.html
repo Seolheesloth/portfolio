@@ -170,6 +170,7 @@
           <input type="number" id="acct2-budget" class="budget-input green" placeholder="10000" oninput="recalc();saveData()">
         </div>
         <div class="s-note green">Allocated: <span id="acct2-allocated">$0.00</span></div>
+        <button class="btn btn-record green" onclick="snapshotHeld('2')" style="margin-top:8px;">📌 현재 목표를 보유로 기록</button>
       </td>
       <td class="c-acct3">
         <div class="s-label">Target Budget</div>
@@ -178,6 +179,7 @@
           <input type="number" id="acct3-budget" class="budget-input purple" placeholder="10000" oninput="recalc();saveData()">
         </div>
         <div class="s-note purple">Allocated: <span id="acct3-allocated">$0.00</span></div>
+        <button class="btn btn-record purple" onclick="snapshotHeld('3')" style="margin-top:8px;">📌 현재 목표를 보유로 기록</button>
       </td>
     </tr>
 
@@ -213,11 +215,8 @@
       <td class="c-acct1"></td>
       <td class="c-acct2">
         <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ Refresh Prices</button>
-        <button class="btn btn-record green" onclick="snapshotHeld('2')" style="margin-top:8px;">📌 현재 목표를 보유로 기록</button>
       </td>
-      <td class="c-acct3">
-        <button class="btn btn-record purple" onclick="snapshotHeld('3')">📌 현재 목표를 보유로 기록</button>
-      </td>
+      <td class="c-acct3"></td>
     </tr>
   </tbody>
 </table>
@@ -441,17 +440,27 @@
         const pctEl= document.getElementById(`pct${n}-${i}`);
         if (!res) return;
         const deltaEl = document.getElementById(`delta${n}-${i}`);
-        if (budget > 0 && price > 0 && pct > 0) {
-          const tv  = pct * budget;
-          const shs = tv / price;
-          r['_target' + n] = shs;  // 런타임 목표 주식수 저장
+        // 가격과 예산만 있으면 계산 (목표 비중이 0%여도 = 전량 매도 케이스 처리)
+        if (budget > 0 && price > 0) {
+          const tv  = pct * budget;       // pct가 0이면 목표 금액 0
+          const shs = tv / price;          // 목표 주식수 (0일 수 있음)
+          r['_target' + n] = shs;
           if (n === '2') alloc2 += tv; else alloc3 += tv;
-          res.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
-          res.innerHTML = `${shs.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
-          if (sub)   sub.textContent  = fmt$(tv);
-          if (pctEl) pctEl.textContent= (pct*100).toFixed(1)+'%';
 
-          // 델타 계산: 목표 - 현재 보유
+          if (shs > 0) {
+            res.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
+            res.innerHTML = `${shs.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
+            if (sub)   sub.textContent  = fmt$(tv);
+            if (pctEl) pctEl.textContent= (pct*100).toFixed(1)+'%';
+          } else {
+            // 목표 0주 — 비중 0%
+            res.className = 'result-shares empty';
+            res.innerHTML = `0.00 <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
+            if (sub)   sub.textContent  = '';
+            if (pctEl) pctEl.textContent= '0.0%';
+          }
+
+          // 델타 계산: 목표 - 현재 보유 (목표가 0이어도 작동)
           if (deltaEl) {
             const held  = parseFloat(r['shares' + n]);
             if (isNaN(held)) {
