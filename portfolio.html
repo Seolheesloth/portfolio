@@ -114,6 +114,11 @@
   .btn-sort:hover    { background: #555; color: white; }
   .btn-refresh { border-color: #1a7a4a; color: #1a7a4a; }
   .btn-refresh:hover { background: #1a7a4a; color: white; }
+  .btn-record { font-size: 11px; display: block; width: 100%; }
+  .btn-record.green  { border-color: #1a7a4a; color: #1a7a4a; }
+  .btn-record.green:hover  { background: #1a7a4a; color: white; }
+  .btn-record.purple { border-color: #7a1a6a; color: #7a1a6a; }
+  .btn-record.purple:hover { background: #7a1a6a; color: white; }
 
   .header-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.3); outline: none; width: 100%; padding: 1px 0; cursor: text; }
 
@@ -208,8 +213,11 @@
       <td class="c-acct1"></td>
       <td class="c-acct2">
         <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ Refresh Prices</button>
+        <button class="btn btn-record green" onclick="snapshotHeld('2')" style="margin-top:8px;">📌 현재 목표를 보유로 기록</button>
       </td>
-      <td class="c-acct3"></td>
+      <td class="c-acct3">
+        <button class="btn btn-record purple" onclick="snapshotHeld('3')">📌 현재 목표를 보유로 기록</button>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -436,6 +444,7 @@
         if (budget > 0 && price > 0 && pct > 0) {
           const tv  = pct * budget;
           const shs = tv / price;
+          r['_target' + n] = shs;  // 런타임 목표 주식수 저장
           if (n === '2') alloc2 += tv; else alloc3 += tv;
           res.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
           res.innerHTML = `${shs.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
@@ -468,6 +477,7 @@
           if (sub)   sub.textContent  = '';
           if (pctEl) pctEl.textContent= '';
           if (deltaEl) { deltaEl.className = 'delta flat'; deltaEl.innerHTML = ''; }
+          r['_target' + n] = null;
         }
       });
     });
@@ -519,6 +529,22 @@
     rows[i]['shares' + acct] = val;
     recalc();
     saveData();
+  };
+
+  // 현재 계산된 목표 주식수를 "보유"로 일괄 저장 (스냅샷)
+  window.snapshotHeld = function(acct) {
+    let count = 0;
+    rows.forEach(r => {
+      const t = r['_target' + acct];
+      if (t != null && !isNaN(t)) {
+        r['shares' + acct] = t.toFixed(2);
+        count++;
+      }
+    });
+    renderRows();
+    saveData();
+    const label = acct === '2' ? 'Account 2' : 'Account 3';
+    alert(`✓ ${label}의 현재 목표 ${count}개 종목을 보유량으로 기록했습니다.\n이제 Account 1을 변경하면 매매 수량이 자동 표시됩니다.`);
   };
 
   // ── Render rows ──
