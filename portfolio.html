@@ -302,7 +302,7 @@
       document.getElementById('user-name').textContent = user.displayName || user.email;
 
       // 유저별 DB 경로
-      DB_REF = ref(db, 'users/' + user.uid + '/portfolio');
+      DB_REF = ref(db, 'portfolio');
       startListening();
     } else {
       document.getElementById('login-screen').style.display = 'flex';
