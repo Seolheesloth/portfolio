@@ -50,6 +50,8 @@
   .s-note.green  span { color: #1a7a4a; }
   .s-note.purple span { color: #7a1a6a; }
   .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
+  .auto-cash-label { font-size: 11px; color: #777; display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
+  .auto-cash-label input { cursor: pointer; }
 
   .row-stock td { border-bottom: 1px solid #e8e8e8; padding: 10px 14px; vertical-align: middle; }
   .row-stock .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
@@ -135,6 +137,9 @@
   <div class="page-title">// PORTFOLIO RATIO CALC</div>
   <div class="page-subtitle">US Equities · Live prices · Cloud sync</div>
   <div class="sync-status synced" id="sync-status">✓ Synced</div>
+  <label class="auto-cash-label">
+    <input type="checkbox" id="auto-cash-toggle" checked> 주식 변경 시 현금 자동 반영
+  </label>
 </div>
 
 <table>
@@ -534,6 +539,32 @@
     recalc();
     saveData();
   };
+
+  // 수량 편집 시작 시점의 값 기억
+  let _sharesBeforeEdit = {};
+  window.rememberShares = function(i) {
+    _sharesBeforeEdit[i] = parseFloat(rows[i].shares1) || 0;
+  };
+
+  // 수량 변경 완료(칸 벗어남) 시 현금 자동 반영
+  window.applyCashFromShares = function(i, newVal) {
+    const toggle = document.getElementById('auto-cash-toggle');
+    if (!toggle || !toggle.checked) return;
+    const oldQ = _sharesBeforeEdit[i];
+    if (oldQ === undefined) return;
+    const newQ  = parseFloat(newVal) || 0;
+    const price = parseFloat(rows[i].price) || 0;
+    if (price <= 0) return;            // 가격 없으면 반영 안 함
+    const delta = newQ - oldQ;
+    if (Math.abs(delta) < 0.0001) return;
+    const cashChange = -delta * price; // 매도(delta<0) → 현금 증가 / 매수 → 현금 감소
+    const cashEl  = document.getElementById('cash1');
+    const curCash = parseFloat(cashEl.value) || 0;
+    cashEl.value  = (curCash + cashChange).toFixed(2);
+    _sharesBeforeEdit[i] = newQ;
+    recalc();
+    saveData();
+  };
   window.updateHeld = function(i, acct, val) {
     rows[i]['shares' + acct] = val;
     recalc();
@@ -582,7 +613,9 @@
         <td class="c-acct1">
           <input class="shares-input" type="number" placeholder="# shares" step="0.001"
             value="${r.shares1}"
-            oninput="updateShares(${i},this.value)">
+            onfocus="rememberShares(${i})"
+            oninput="updateShares(${i},this.value)"
+            onchange="applyCashFromShares(${i},this.value)">
           <div class="cell-sub">
             <span id="sub1-${i}">—</span>
             <span class="badge badge-blue" id="pct1-${i}"></span>
