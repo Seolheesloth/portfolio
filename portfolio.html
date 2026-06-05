@@ -451,13 +451,19 @@
   window.recalc = function() {
     const total1  = getTotal1();
 
-    // Account 2,3 budget: 자동이면 실제 보유 자산 합으로 채움
+    // Account 2,3 Total Value: 자동 모드면 입력값을 잠그되, 수기로 넣은 값이 있으면 그대로 유지(기준점).
+    // 값이 비어있을 때만 보유 자산 합으로 1회 자동 채움.
     ['2','3'].forEach(acct => {
       const autoEl   = document.getElementById('auto' + acct);
       const budgetEl = document.getElementById('acct' + acct + '-budget');
       if (autoEl && autoEl.checked) {
-        const auto = accountTotal(acct);
-        budgetEl.value = auto > 0 ? auto.toFixed(2) : '';
+        const cur = parseFloat(budgetEl.value);
+        if (isNaN(cur) || cur <= 0) {
+          // 수기값이 없을 때만 자동 계산값으로 채움
+          const auto = accountTotal(acct);
+          budgetEl.value = auto > 0 ? auto.toFixed(2) : '';
+        }
+        // 수기값이 이미 있으면 건드리지 않음 (기준점 보존)
         budgetEl.readOnly = true;
       } else if (budgetEl) {
         budgetEl.readOnly = false;
