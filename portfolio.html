@@ -512,24 +512,25 @@
             if (pctEl) pctEl.textContent= '0.0%';
           }
 
-          // 델타 계산: 목표 - 현재 보유 (목표가 0이어도 작동)
+          // 델타 계산: 목표 - 현재 보유 (보유 미입력은 0주로 간주 → 새 종목은 전량 매수 표시)
           if (deltaEl) {
-            const held  = parseFloat(r['shares' + n]);
-            if (isNaN(held)) {
+            let held = parseFloat(r['shares' + n]);
+            const heldEmpty = isNaN(held);
+            if (heldEmpty) held = 0;
+            const delta = shs - held;
+            if (heldEmpty && shs === 0) {
+              // 목표도 0이고 보유도 없음 → 표시 안 함
               deltaEl.className = 'delta flat';
               deltaEl.innerHTML = '';
+            } else if (Math.abs(delta) < 0.005) {
+              deltaEl.className = 'delta flat';
+              deltaEl.innerHTML = '✓ 일치';
+            } else if (delta > 0) {
+              deltaEl.className = 'delta buy';
+              deltaEl.innerHTML = `+${delta.toFixed(2)} <span class="delta-note">매수</span>`;
             } else {
-              const delta = shs - held;
-              if (Math.abs(delta) < 0.005) {
-                deltaEl.className = 'delta flat';
-                deltaEl.innerHTML = '✓ 일치';
-              } else if (delta > 0) {
-                deltaEl.className = 'delta buy';
-                deltaEl.innerHTML = `+${delta.toFixed(2)} <span class="delta-note">매수</span>`;
-              } else {
-                deltaEl.className = 'delta sell';
-                deltaEl.innerHTML = `−${Math.abs(delta).toFixed(2)} <span class="delta-note">매도</span>`;
-              }
+              deltaEl.className = 'delta sell';
+              deltaEl.innerHTML = `−${Math.abs(delta).toFixed(2)} <span class="delta-note">매도</span>`;
             }
           }
         } else {
