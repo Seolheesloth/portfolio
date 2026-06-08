@@ -762,8 +762,28 @@
     saveData();
   };
 
-  window.deleteRow = function(i) {
-    if (rows.length > 1) { rows.splice(i, 1); renderRows(); saveData(); }
+  window.deleteRow = async function(i) {
+    if (rows.length <= 1) return;
+    // 자동 현금 반영이 켜져 있으면, 행 삭제 = 전량 매도로 간주 → 보유수량 × 가격만큼 현금 환원
+    const toggle = document.getElementById('auto-cash-toggle');
+    if (toggle && toggle.checked) {
+      const qty = parseFloat(rows[i].shares1) || 0;
+      if (qty > 0) {
+        let price = parseFloat(rows[i].price) || 0;
+        if (price <= 0 && rows[i].ticker) {
+          await fetchPrice(rows[i].ticker, i);   // 가격 없으면 먼저 조회
+          price = parseFloat(rows[i].price) || 0;
+        }
+        if (price > 0) {
+          const cashEl  = document.getElementById('cash1');
+          const curCash = parseFloat(cashEl.value) || 0;
+          cashEl.value  = (curCash + qty * price).toFixed(2);
+        }
+      }
+    }
+    rows.splice(i, 1);
+    renderRows();
+    saveData();
   };
 
   window.addRow = function() {
