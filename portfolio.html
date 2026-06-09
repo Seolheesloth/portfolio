@@ -741,17 +741,6 @@
     for (let i = 0; i < rows.length; i++) {
       if (rows[i].ticker) await fetchPrice(rows[i].ticker, i);
     }
-    // 가격 갱신 직후: 자동 모드인 Account 2,3은 최신 주가 기준으로 Total Value 재계산
-    // (평상시엔 수기값을 유지하지만, '가격 갱신'을 누른 이 시점엔 강제로 최신가 반영)
-    ['2','3'].forEach(acct => {
-      const autoEl = document.getElementById('auto' + acct);
-      if (autoEl && autoEl.checked) {
-        const auto = accountTotal(acct);
-        if (auto > 0) document.getElementById('acct' + acct + '-budget').value = auto.toFixed(2);
-      }
-    });
-    recalc();
-    saveData();
   };
 
   window.onTickerBlur = function(i) {
