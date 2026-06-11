@@ -738,9 +738,35 @@
   }
 
   window.refreshAllPrices = async function() {
+    // 이전 가격 저장 (주가 변동분 계산용)
+    const oldPrices = rows.map(r => parseFloat(r.price) || 0);
+
     for (let i = 0; i < rows.length; i++) {
       if (rows[i].ticker) await fetchPrice(rows[i].ticker, i);
     }
+
+    // 가격 갱신 시: 자동 모드인 Account 2,3은 기존 Total Value에 '주가 변동분'만 반영
+    // (수기 기준값을 유지하면서, 보유주식의 가격 변동만큼만 조정 → 현금칸 안 채워도 정확)
+    ['2','3'].forEach(acct => {
+      const autoEl = document.getElementById('auto' + acct);
+      if (!autoEl || !autoEl.checked) return;
+      let delta = 0;
+      rows.forEach((r, i) => {
+        const held = parseFloat(r['shares' + acct]);
+        const newP = parseFloat(r.price) || 0;
+        const oldP = oldPrices[i];
+        if (!isNaN(held) && oldP > 0 && newP > 0) {
+          delta += held * (newP - oldP);
+        }
+      });
+      const budgetEl = document.getElementById('acct' + acct + '-budget');
+      const cur = parseFloat(budgetEl.value) || 0;
+      if (cur > 0 && Math.abs(delta) > 0.005) {
+        budgetEl.value = (cur + delta).toFixed(2);
+      }
+    });
+    recalc();
+    saveData();
   };
 
   window.onTickerBlur = function(i) {
