@@ -596,38 +596,58 @@
     }
   };
 
-  // 수량 변경 완료(칸 벗어남) 시 현금 자동 반영
+  // 수량 변경 완료(칸 벗어남) 시 현금 자동 반영 (PC). 모바일에서 이 이벤트가 누락돼도
+  // '가격 갱신' 시 settleSharesCash()가 동일하게 정산하므로 둘 중 하나만 동작해도 정확함.
   window.applyCashFromShares = async function(i, newVal) {
     const toggle = document.getElementById('auto-cash-toggle');
     if (!toggle || !toggle.checked) return;
-    // 확정된 직전 수량 (focus 이벤트 대신 데이터에 기록된 값 사용 → 모바일에서도 안정적)
     let oldQ = parseFloat(rows[i]._committedShares1);
-    if (isNaN(oldQ)) oldQ = parseFloat(rows[i].shares1) || 0;
+    if (isNaN(oldQ)) oldQ = 0;
     const newQ  = parseFloat(newVal) || 0;
     const delta = newQ - oldQ;
-    if (Math.abs(delta) < 0.0001) { rows[i]._committedShares1 = String(newQ); return; }
+    if (Math.abs(delta) < 0.0001) return;
 
-    // 가격이 없으면 (새로 추가한 종목 등) 먼저 가격을 가져온다
     let price = parseFloat(rows[i].price) || 0;
     if (price <= 0 && rows[i].ticker) {
       await fetchPrice(rows[i].ticker, i);
       price = parseFloat(rows[i].price) || 0;
     }
     if (price <= 0) {
-      // 그래도 가격이 안 들어오면 '매수/매도 대기'로 기록 → 가격 들어오는 순간 정산
-      rows[i]._pendingCashDelta = (rows[i]._pendingCashDelta || 0) + delta;
-      rows[i]._committedShares1 = String(newQ);
+      // 가격이 아직 없으면 지금 정산하지 않음 → _committedShares1을 그대로 둬서
+      // '가격 갱신'을 누를 때 settleSharesCash()가 차액을 정산하도록 함
       return;
     }
 
-    const cashChange = -delta * price; // 매도(delta<0) → 현금 증가 / 매수 → 현금 감소
     const cashEl  = document.getElementById('cash1');
     const curCash = parseFloat(cashEl.value) || 0;
-    cashEl.value  = (curCash + cashChange).toFixed(2);
+    cashEl.value  = (curCash - delta * price).toFixed(2);  // 매수(+delta)→감소, 매도(-delta)→증가
     rows[i]._committedShares1 = String(newQ);
     recalc();
     saveData();
   };
+
+  // 모든 종목의 '현재 수량 vs 마지막 정산 수량' 차이를 현금에 일괄 정산
+  // (모바일에서 onchange 누락 대비 — '가격 갱신' 시 호출)
+  function settleSharesCash() {
+    const toggle = document.getElementById('auto-cash-toggle');
+    if (!toggle || !toggle.checked) return;
+    const cashEl = document.getElementById('cash1');
+    let cash = parseFloat(cashEl.value) || 0;
+    let changed = false;
+    rows.forEach(r => {
+      let committed = parseFloat(r._committedShares1);
+      if (isNaN(committed)) committed = 0;
+      const current = parseFloat(r.shares1) || 0;
+      const price   = parseFloat(r.price) || 0;
+      const delta   = current - committed;
+      if (Math.abs(delta) > 0.0001 && price > 0) {
+        cash -= delta * price;
+        r._committedShares1 = String(current);
+        changed = true;
+      }
+    });
+    if (changed) { cashEl.value = cash.toFixed(2); }
+  }
   window.updateHeld = function(i, acct, val) {
     rows[i]['shares' + acct] = val;
     recalc();
@@ -739,17 +759,6 @@
           priceEl.classList.add('live');
           setTimeout(() => priceEl.classList.remove('live'), 2000);
         }
-        // 가격이 없어서 보류됐던 매수/매도 현금 정산 처리
-        if (rows[index] && rows[index]._pendingCashDelta != null) {
-          const toggle = document.getElementById('auto-cash-toggle');
-          if (toggle && toggle.checked) {
-            const delta = rows[index]._pendingCashDelta;
-            const cashEl  = document.getElementById('cash1');
-            const curCash = parseFloat(cashEl.value) || 0;
-            cashEl.value  = (curCash - delta * data.c).toFixed(2);
-          }
-          rows[index]._pendingCashDelta = null;
-        }
         recalc();
         saveData();
         const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -765,6 +774,10 @@
     for (let i = 0; i < rows.length; i++) {
       if (rows[i].ticker) await fetchPrice(rows[i].ticker, i);
     }
+
+    // 가격이 모두 들어온 뒤: 미정산 수량 변경(새 종목 추가/수량 수정)을 현금에 일괄 정산
+    // → 모바일에서 onchange가 누락돼도 '가격 갱신' 한 번으로 현금이 정확히 맞춰짐
+    settleSharesCash();
 
     // 가격 갱신 시: 자동 모드인 Account 2,3은 기존 Total Value에 '주가 변동분'만 반영
     // (수기 기준값을 유지하면서, 보유주식의 가격 변동만큼만 조정 → 현금칸 안 채워도 정확)
