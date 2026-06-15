@@ -13,7 +13,8 @@
   .page-header { max-width: 1100px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
   .page-title { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
   .page-subtitle { font-size: 12px; color: #777; }
-  .version-tag { display: inline-block; margin-top: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #999; background: #f7f7f7; border: 1px solid #e2e2e2; border-radius: 6px; padding: 4px 10px; }
+  .version-wrap { max-width: 1100px; margin: 16px auto 0; text-align: left; }
+  .version-tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #999; background: #f7f7f7; border: 1px solid #e2e2e2; border-radius: 6px; padding: 4px 10px; }
   .sync-status { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 4px; }
   .sync-status.synced  { background: #edf7f2; color: #1a7a4a; }
   .sync-status.saving  { background: #fff8e0; color: #8a6a00; }
@@ -233,7 +234,9 @@
   </tbody>
 </table>
 
-<div class="version-tag" id="version-tag" title="GitHub 최신 커밋 기준">버전 확인 중…</div>
+<div class="version-wrap">
+  <span class="version-tag" id="version-tag" title="GitHub 최신 커밋 기준">버전 확인 중…</span>
+</div>
 
 <!-- Firebase -->
 <style>
