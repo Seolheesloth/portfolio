@@ -51,7 +51,7 @@
   .s-note { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-top: 5px; }
   .s-note.green  span { color: #8a5320; }
   .s-note.purple span { color: #7a1a6a; }
-  .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
+  .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 8px; }
   .auto-cash-label { font-size: 11px; color: #777; display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
   .auto-cash-label input { cursor: pointer; }
   .control-bar { max-width: 1100px; margin: 0 auto 14px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -172,7 +172,6 @@
     <tr class="row-summary">
       <td class="c-ticker">
         <div style="font-size:11px;color:#aaa;font-family:monospace">—</div>
-        <div class="last-updated" id="last-updated"></div>
       </td>
       <td class="c-acct1">
         <div class="s-label">Total Value</div>
@@ -210,6 +209,7 @@
           <span id="cash1-sub">—</span>
           <span class="badge badge-blue" id="cash1-pct"></span>
         </div>
+        <div class="last-updated" id="last-updated"></div>
       </td>
       <td class="c-acct2">
         <div class="result-shares green empty" id="cash2-amount">목표 →</div>
@@ -461,7 +461,8 @@
         else if (diffMin < 60)  rel = diffMin + '분 전';
         else if (diffMin < 1440) rel = Math.round(diffMin / 60) + '시간 전';
         else                    rel = Math.round(diffMin / 1440) + '일 전';
-        el.textContent = '📦 ' + (msg || '(no message)') + ' · ' + timeStr + ' (' + rel + ')';
+        const displayMsg = (msg || '(no message)').replace(/^Update\b/, 'Ver.');
+        el.textContent = '📦 ' + displayMsg + ' · ' + timeStr + ' (' + rel + ')';
       } else {
         el.textContent = '📦 버전 정보 없음';
       }
