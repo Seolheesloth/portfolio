@@ -372,9 +372,20 @@
       if (data.h1)      document.getElementById('h-acct1').value = data.h1;
       if (data.h2)      document.getElementById('h-acct2').value = data.h2;
       if (data.h3)      document.getElementById('h-acct3').value = data.h3;
+      if (data.lastRefresh) lastRefreshTime = data.lastRefresh;
       isLoading = false;
       renderRows();
       setSyncStatus('synced');
+
+      // 페이지 열 때 1회: 마지막 갱신이 1시간 넘었으면 자동 갱신 + 보유기록
+      if (!autoCheckedOnLoad) {
+        autoCheckedOnLoad = true;
+        if (lastRefreshTime && (Date.now() - lastRefreshTime > AUTO_MS)) {
+          setTimeout(() => autoUpdate('page-load'), 800);
+        } else {
+          resetInactivityTimer();   // 최신이면 비활성 타이머만 시작
+        }
+      }
     });
   }
 
@@ -393,6 +404,38 @@
   let fetchTimer = {};
   let saveTimer  = null;
   let isLoading  = false;
+
+  // ── 자동 갱신 (1시간 비활성 / 페이지 열 때 오래된 정보면) ──
+  const AUTO_MS = 60 * 60 * 1000;       // 1시간
+  let lastRefreshTime = Date.now();     // 마지막 가격 갱신 시각 (Firebase에 저장/복원)
+  let inactivityTimer = null;
+  let autoCheckedOnLoad = false;
+  let autoRunning = false;
+
+  async function autoUpdate(reason) {
+    if (autoRunning) return;
+    autoRunning = true;
+    try {
+      await refreshAllPrices();   // 가격 갱신 (내부에서 lastRefreshTime 갱신)
+      if (window.snapshotAll) snapshotAll();  // 보유기록
+      const el = document.getElementById('last-updated');
+      if (el) {
+        const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        el.textContent = '⟳ 자동 갱신 ' + t;
+      }
+    } catch(e) {}
+    autoRunning = false;
+    resetInactivityTimer();   // 다음 1시간 타이머 재시작
+  }
+
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => autoUpdate('inactivity'), AUTO_MS);
+  }
+
+  // 사용자 활동 감지 → 비활성 타이머 리셋
+  ['click', 'keydown', 'input', 'touchstart'].forEach(ev =>
+    document.addEventListener(ev, resetInactivityTimer, { passive: true }));
 
   function setSyncStatus(status) {
     const el = document.getElementById('sync-status');
@@ -447,6 +490,7 @@
           h1:      document.getElementById('h-acct1').value,
           h2:      document.getElementById('h-acct2').value,
           h3:      document.getElementById('h-acct3').value,
+          lastRefresh: lastRefreshTime,
         };
         if (!DB_REF) return;
         await set(DB_REF, data);
@@ -839,6 +883,7 @@
         budgetEl.value = (cur + delta).toFixed(2);
       }
     });
+    lastRefreshTime = Date.now();   // 마지막 갱신 시각 기록 (자동 갱신 판단용)
     recalc();
     saveData();
   };
