@@ -352,7 +352,12 @@
         return;
       }
       isLoading = true;
-      rows = data.rows || DEFAULT_ROWS.map(x => ({...x}));
+      rows = (data.rows || DEFAULT_ROWS.map(x => ({...x}))).map(r => ({
+        ticker: r.ticker, price: r.price,
+        shares1: r.shares1, shares2: r.shares2, shares3: r.shares3,
+        // 정산 기준값을 함께 복원 → 에코로 화면이 다시 그려져도 현금 정산 기준이 어긋나지 않음
+        _committedShares1: (r.committed !== undefined && r.committed !== null) ? r.committed : (r.shares1 !== undefined ? r.shares1 : '0')
+      }));
       if (data.budget2) document.getElementById('acct2-budget').value = data.budget2;
       if (data.budget3) document.getElementById('acct3-budget').value = data.budget3;
       if (data.cash1)   document.getElementById('cash1').value = data.cash1;
@@ -427,7 +432,7 @@
     saveTimer = setTimeout(async () => {
       try {
         const data = {
-          rows: rows.map(r => ({ ticker: r.ticker, price: r.price, shares1: r.shares1, shares2: r.shares2, shares3: r.shares3 })),
+          rows: rows.map(r => ({ ticker: r.ticker, price: r.price, shares1: r.shares1, shares2: r.shares2, shares3: r.shares3, committed: (r._committedShares1 !== undefined ? r._committedShares1 : r.shares1) })),
           budget2: document.getElementById('acct2-budget').value,
           budget3: document.getElementById('acct3-budget').value,
           cash1:   document.getElementById('cash1').value,
