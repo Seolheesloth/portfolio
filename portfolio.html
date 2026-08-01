@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,16 +10,24 @@
   html, body { background: #ffffff; }
   body { color: #111; font-family: 'IBM Plex Sans', sans-serif; padding: 28px 16px 60px; }
 
-  .page-header { max-width: 1100px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  /* ── Header ── */
+  .page-header { position: relative; max-width: 1100px; margin: 0 auto 22px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
   .page-title { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
   .page-subtitle { font-size: 12px; color: #777; }
+  .sync-status { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 4px; }
+  .sync-status.synced { background: #edf7f2; color: #1a7a4a; }
+  .sync-status.saving { background: #fff8e0; color: #8a6a00; }
+  .sync-status.error  { background: #fdedf0; color: #b83232; }
+  .auto-cash-label { font-size: 11px; color: #777; display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
+  .auto-cash-label input { cursor: pointer; }
+
+  .control-bar { max-width: 1100px; margin: 0 auto 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .control-bar .btn { font-size: 15px; padding: 11px 24px; border-radius: 8px; }
+
   .version-wrap { max-width: 1100px; margin: 16px auto 0; text-align: left; }
   .version-tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #999; background: #f7f7f7; border: 1px solid #e2e2e2; border-radius: 6px; padding: 4px 10px; }
-  .sync-status { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 4px; }
-  .sync-status.synced  { background: #edf7f2; color: #1a7a4a; }
-  .sync-status.saving  { background: #fff8e0; color: #8a6a00; }
-  .sync-status.error   { background: #fdedf0; color: #b83232; }
 
+  /* ── Table shell ── */
   table { max-width: 1100px; width: 100%; margin: 0 auto; border-collapse: collapse; border: 1.5px solid #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 3px 3px 0 rgba(0,0,0,0.07); }
   col.c-ticker { width: 130px; }
 
@@ -28,7 +36,9 @@
   .row-header .c-acct1  { background: #1a3fa8; border-right: 1px solid rgba(255,255,255,0.2); }
   .row-header .c-acct2  { background: #5c3815; border-right: 1px solid rgba(255,255,255,0.2); }
   .row-header .c-acct3  { background: #7a1a6a; }
+  .header-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.3); outline: none; width: 100%; padding: 1px 0; cursor: text; }
 
+  /* ── Summary row ── */
   .row-summary td { border-bottom: 1.5px solid #1a1a1a; padding: 14px; vertical-align: middle; }
   .row-summary .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
   .row-summary .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
@@ -37,37 +47,37 @@
 
   .s-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
   .s-value { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
-  .s-value.blue   { color: #1a3fa8; }
-  .s-value.green  { color: #8a5320; }
-  .s-value.purple { color: #7a1a6a; }
-  .budget-wrap { display: flex; align-items: center; gap: 1px; }
-  .budget-dollar-green  { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #8a5320; }
-  .budget-dollar-purple { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #7a1a6a; }
-  .budget-input { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; background: transparent; border: none; outline: none; width: 100%; padding: 0; }
-  .budget-input.green  { color: #8a5320; }
-  .budget-input.purple { color: #7a1a6a; }
-  .budget-input.green::placeholder  { color: #c8a888; font-weight: 400; font-size: 16px; }
-  .budget-input.purple::placeholder { color: #c8a0c4; font-weight: 400; font-size: 16px; }
+  .s-value.blue { color: #1a3fa8; }
   .s-note { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-top: 5px; }
-  .s-note.green  span { color: #8a5320; }
+  .s-note.brown  span { color: #8a5320; }
   .s-note.purple span { color: #7a1a6a; }
-  .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 8px; }
-  .auto-cash-label { font-size: 11px; color: #777; display: flex; align-items: center; gap: 5px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
-  .auto-cash-label input { cursor: pointer; }
-  .control-bar { max-width: 1100px; margin: 0 auto 14px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .control-bar .btn { font-size: 15px; padding: 11px 24px; border-radius: 8px; }
   .auto-toggle { font-size: 9px; font-weight: 500; text-transform: none; letter-spacing: 0; color: #999; margin-left: 6px; cursor: pointer; }
   .auto-toggle input { cursor: pointer; vertical-align: middle; }
+
+  .budget-wrap { display: flex; align-items: center; gap: 1px; }
+  .budget-sym { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  .budget-sym.brown  { color: #8a5320; }
+  .budget-sym.purple { color: #7a1a6a; }
+  .budget-input { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; background: transparent; border: none; outline: none; width: 100%; padding: 0; }
+  .budget-input.brown  { color: #8a5320; }
+  .budget-input.purple { color: #7a1a6a; }
+  .budget-input.brown::placeholder  { color: #c8a888; font-weight: 400; font-size: 16px; }
+  .budget-input.purple::placeholder { color: #c8a0c4; font-weight: 400; font-size: 16px; }
   .budget-input:read-only { color: #888; }
 
+  /* ── Stock rows ── */
   .row-stock td { border-bottom: 1px solid #e8e8e8; padding: 10px 14px; vertical-align: middle; }
   .row-stock .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
   .row-stock .c-acct1  { background: #fff;    border-right: 1px solid #e8e8e8; }
   .row-stock .c-acct2  { background: #faf6f0; border-right: 1px solid #e8e8e8; }
   .row-stock .c-acct3  { background: #faf2f9; }
 
-  .ticker-input { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; background: transparent; border: none; outline: none; color: #111; width: 100%; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .ticker-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .ticker-input { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; background: transparent; border: none; outline: none; color: #111; width: 100%; text-transform: uppercase; }
   .ticker-input::placeholder { color: #ccc; font-weight: 400; text-transform: none; }
+  .del-btn { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; background: none; border: none; color: #ccc; cursor: pointer; padding: 0 0 0 4px; line-height: 1; }
+  .del-btn:hover, .del-btn:focus-visible { color: #b83232; }
+
   .price-wrap { display: flex; align-items: center; gap: 3px; }
   .price-sym { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #999; }
   .price-input { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #888; background: transparent; border: none; border-bottom: 1px dashed #ccc; outline: none; width: 100%; padding: 1px 0; }
@@ -82,13 +92,14 @@
   .cell-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #888; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .badge { font-size: 13px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
   .badge-blue   { background: #edf1fb; color: #1a3fa8; }
-  .badge-green  { background: #f5ece0; color: #8a5320; }
+  .badge-brown  { background: #f5ece0; color: #8a5320; }
   .badge-purple { background: #f7edf6; color: #7a1a6a; }
 
   .result-shares { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; display: block; margin-bottom: 6px; }
-  .result-shares.green  { color: #8a5320; }
+  .result-shares.brown  { color: #8a5320; }
   .result-shares.purple { color: #7a1a6a; }
   .result-shares.empty  { font-size: 12px; font-weight: 400; color: #bbb; }
+  .shs-unit { font-size: 10px; font-weight: 400; color: #aaa; }
 
   /* 현재 보유 입력 + 델타 */
   .held-wrap { display: flex; align-items: center; gap: 4px; margin-top: 7px; }
@@ -102,40 +113,78 @@
   .delta.flat { color: #aaa; font-size: 12px; font-weight: 500; }
   .delta-note { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #bbb; }
 
+  /* ── Cash row ── */
   .row-cash td { border-bottom: 1.5px solid #1a1a1a; padding: 10px 14px; vertical-align: middle; }
   .row-cash .c-ticker { background: #fffbea; border-right: 1.5px solid #1a1a1a; }
   .row-cash .c-acct1  { background: #fffbea; border-right: 1px solid #e8dfa0; }
   .row-cash .c-acct2  { background: #faf6f0; border-right: 1px solid #e8e8e8; }
   .row-cash .c-acct3  { background: #fbf0fa; }
+  .cash-tag  { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #7a6000; margin-bottom: 3px; }
+  .cash-unit { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #b8a040; }
   .cash-input { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; background: transparent; border: none; border-bottom: 1.5px solid transparent; outline: none; color: #111; width: 100%; padding: 1px 0; display: block; margin-bottom: 6px; }
   .cash-input:focus { border-bottom-color: #8a7a00; }
   .cash-input::placeholder { color: #ccc; font-weight: 400; font-size: 13px; }
+  .last-updated { font-size: 10px; color: #aaa; font-family: 'IBM Plex Mono', monospace; margin-top: 8px; }
 
-  .row-footer td { padding: 10px 14px; vertical-align: middle; }
-  .row-footer .c-ticker { background: #f7f7f7; border-right: 1.5px solid #1a1a1a; }
-  .row-footer .c-acct1  { background: #fff;    border-right: 1px solid #ddd; }
-  .row-footer .c-acct2  { background: #f2faf6; border-right: 1px solid #ddd; }
-  .row-footer .c-acct3  { background: #faf2f9; }
-
+  /* ── Buttons ── */
   .btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; border: 1.5px solid #1a1a1a; border-radius: 6px; padding: 6px 14px; cursor: pointer; background: white; color: #111; transition: all 0.15s; }
   .btn:hover { background: #1a1a1a; color: white; }
-  .btn-sort    { border-color: #555; color: #555; }
-  .btn-sort:hover    { background: #555; color: white; }
+  .btn-sort    { border-color: #555;    color: #555; }
+  .btn-sort:hover    { background: #555;    color: white; }
   .btn-refresh { border-color: #1a7a4a; color: #1a7a4a; }
   .btn-refresh:hover { background: #1a7a4a; color: white; }
-  .btn-record { border-color: #5c3815; color: #5c3815; }
-  .btn-record:hover { background: #5c3815; color: white; }
+  .btn-record  { border-color: #5c3815; color: #5c3815; }
+  .btn-record:hover  { background: #5c3815; color: white; }
+  .btn:disabled { opacity: .5; cursor: default; }
 
-  .header-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.3); outline: none; width: 100%; padding: 1px 0; cursor: text; }
+  /* ── Login ── */
+  #login-screen { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; gap: 20px; }
+  #login-screen h1 { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  #login-screen p  { font-size: 13px; color: #777; }
+  #google-login-btn { display: flex; align-items: center; gap: 10px; padding: 12px 24px; border: 1.5px solid #1a1a1a; border-radius: 8px; background: white; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; transition: all .15s; }
+  #google-login-btn:hover { background: #1a1a1a; color: white; }
+  #login-error { font-size: 12px; color: #b83232; font-family: 'IBM Plex Mono', monospace; min-height: 16px; }
+
+  #user-bar { display: none; align-items: center; gap: 10px; position: fixed; top: 16px; right: 16px; z-index: 10; }
+  #user-bar img { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #ddd; }
+  #user-bar span { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: #777; }
+  #logout-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; border: 1px solid #ddd; border-radius: 4px; padding: 4px 10px; cursor: pointer; background: white; color: #777; }
+  #logout-btn:hover { border-color: #b83232; color: #b83232; }
 
   @media (max-width: 700px) {
     col.c-ticker { width: 90px; }
     .s-value { font-size: 15px; }
     .result-shares { font-size: 14px; }
+    #user-bar { position: static; justify-content: flex-end; margin: 0 auto 12px; max-width: 1100px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
   }
 </style>
 </head>
 <body>
+
+<!-- Login gate -->
+<div id="login-screen">
+  <h1>// PORTFOLIO RATIO CALC</h1>
+  <p>Google 계정으로 로그인하면 저장된 데이터를 불러옵니다</p>
+  <button id="google-login-btn" onclick="googleLogin()">
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/>
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.5 35.6 26.9 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.5 5C9.5 39.6 16.3 44 24 44z"/>
+      <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.2 5.2C41 35.2 44 30 44 24c0-1.3-.1-2.7-.4-4z"/>
+    </svg>
+    Google로 로그인
+  </button>
+  <div id="login-error"></div>
+</div>
+
+<div id="user-bar">
+  <img id="user-photo" alt="" onerror="this.style.display='none'">
+  <span id="user-name"></span>
+  <button id="logout-btn" onclick="googleLogout()">로그아웃</button>
+</div>
 
 <div class="page-header">
   <div class="page-title">// PORTFOLIO RATIO CALC</div>
@@ -149,7 +198,7 @@
 <div class="control-bar">
   <button class="btn" onclick="addRow()">+ 종목 추가</button>
   <button class="btn btn-sort" onclick="sortAlpha()">A→Z 정렬</button>
-  <button class="btn btn-refresh" onclick="refreshAllPrices()">↻ 가격 갱신</button>
+  <button class="btn btn-refresh" id="refresh-btn" onclick="refreshAllPrices()">↻ 가격 갱신</button>
   <button class="btn btn-record" id="snapshot-btn" onclick="snapshotAll()">📌 보유기록</button>
 </div>
 
@@ -169,26 +218,29 @@
     </tr>
   </thead>
   <tbody>
+
     <tr class="row-summary">
-      <td class="c-ticker">
-        <div style="font-size:11px;color:#aaa;font-family:monospace">—</div>
-      </td>
+      <td class="c-ticker"><div style="font-size:11px;color:#aaa;font-family:'IBM Plex Mono',monospace">—</div></td>
       <td class="c-acct1">
         <div class="s-label">Total Value</div>
         <div class="s-value blue" id="acct1-total">$0.00</div>
       </td>
       <td class="c-acct2">
-        <div class="s-label">Total Value <label class="auto-toggle"><input type="checkbox" id="auto2" checked onchange="recalc();saveData()"> 자동</label></div>
-        <div class="budget-wrap">
-          <span class="budget-dollar-green">$</span>
-          <input type="number" id="acct2-budget" class="budget-input green" placeholder="자동 계산" oninput="recalc();saveData()">
+        <div class="s-label">Total Value
+          <label class="auto-toggle"><input type="checkbox" id="auto2" checked onchange="recalc();saveData()"> 자동</label>
         </div>
-        <div class="s-note green">Allocated: <span id="acct2-allocated">$0.00</span></div>
+        <div class="budget-wrap">
+          <span class="budget-sym brown">$</span>
+          <input type="number" id="acct2-budget" class="budget-input brown" placeholder="자동 계산" oninput="recalc();saveData()">
+        </div>
+        <div class="s-note brown">Allocated: <span id="acct2-allocated">$0.00</span></div>
       </td>
       <td class="c-acct3">
-        <div class="s-label">Total Value <label class="auto-toggle"><input type="checkbox" id="auto3" checked onchange="recalc();saveData()"> 자동</label></div>
+        <div class="s-label">Total Value
+          <label class="auto-toggle"><input type="checkbox" id="auto3" checked onchange="recalc();saveData()"> 자동</label>
+        </div>
         <div class="budget-wrap">
-          <span class="budget-dollar-purple">$</span>
+          <span class="budget-sym purple">$</span>
           <input type="number" id="acct3-budget" class="budget-input purple" placeholder="자동 계산" oninput="recalc();saveData()">
         </div>
         <div class="s-note purple">Allocated: <span id="acct3-allocated">$0.00</span></div>
@@ -197,8 +249,8 @@
 
     <tr class="row-cash" id="cash-row">
       <td class="c-ticker">
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#7a6000;margin-bottom:3px;">CASH</div>
-        <div style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#b8a040;">USD</div>
+        <div class="cash-tag">CASH</div>
+        <div class="cash-unit">USD</div>
       </td>
       <td class="c-acct1">
         <div class="price-wrap" style="margin-bottom:6px;">
@@ -212,12 +264,11 @@
         <div class="last-updated" id="last-updated"></div>
       </td>
       <td class="c-acct2">
-        <div class="result-shares green empty" id="cash2-amount">목표 →</div>
-        <div class="cell-sub"><span class="badge badge-green" id="cash2-pct"></span></div>
+        <div class="result-shares brown empty" id="cash2-amount">목표 →</div>
+        <div class="cell-sub"><span class="badge badge-brown" id="cash2-pct"></span></div>
         <div class="held-wrap">
           <span class="held-label">보유$</span>
-          <input class="held-input" type="number" id="cash2-held" placeholder="0" step="0.01"
-            oninput="recalc();saveData()">
+          <input class="held-input" type="number" id="cash2-held" placeholder="0" step="0.01" oninput="recalc();saveData()">
         </div>
       </td>
       <td class="c-acct3">
@@ -225,8 +276,7 @@
         <div class="cell-sub"><span class="badge badge-purple" id="cash3-pct"></span></div>
         <div class="held-wrap">
           <span class="held-label">보유$</span>
-          <input class="held-input" type="number" id="cash3-held" placeholder="0" step="0.01"
-            oninput="recalc();saveData()">
+          <input class="held-input" type="number" id="cash3-held" placeholder="0" step="0.01" oninput="recalc();saveData()">
         </div>
       </td>
     </tr>
@@ -238,714 +288,676 @@
   <span class="version-tag" id="version-tag" title="GitHub 최신 커밋 기준">버전 확인 중…</span>
 </div>
 
-<!-- Firebase -->
-<style>
-  #login-screen {
-    position: fixed; inset: 0; background: #fff;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 9999; gap: 20px;
-  }
-  #login-screen h1 { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
-  #login-screen p  { font-size: 13px; color: #777; }
-  #google-login-btn {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 24px; border: 1.5px solid #1a1a1a; border-radius: 8px;
-    background: white; cursor: pointer; font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px; font-weight: 600; transition: all .15s;
-  }
-  #google-login-btn:hover { background: #1a1a1a; color: white; }
-  #user-bar {
-    display: none; align-items: center; gap: 10px;
-    position: absolute; top: 16px; right: 16px;
-  }
-  #user-bar img { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #ddd; }
-  #user-bar span { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: #777; }
-  #logout-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
-    border: 1px solid #ddd; border-radius: 4px; padding: 4px 10px; cursor: pointer;
-    background: white; color: #777; }
-  #logout-btn:hover { border-color: #b83232; color: #b83232; }
-  .page-header { position: relative; }
-</style>
-
-<!-- Login screen -->
-<div id="login-screen">
-  <h1>// PORTFOLIO RATIO CALC</h1>
-  <p>Google 계정으로 로그인하여 데이터를 불러오세요</p>
-  <button id="google-login-btn" onclick="googleLogin()">
-    <svg width="18" height="18" viewBox="0 0 48 48">
-      <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/>
-      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.5 35.6 26.9 36 24 36c-5.2 0-9.6-3-11.3-7.3l-6.5 5C9.5 39.6 16.3 44 24 44z"/>
-      <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.2 5.2C41 35.2 44 30 44 24c0-1.3-.1-2.7-.4-4z"/>
-    </svg>
-    Google로 로그인
-  </button>
-</div>
-
-<!-- User bar (shown after login) -->
-<div id="user-bar">
-  <img id="user-photo" src="" onerror="this.style.display='none'">
-  <span id="user-name"></span>
-  <button id="logout-btn" onclick="googleLogout()">로그아웃</button>
-</div>
-
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCwUS9-uzZtmXzeIC-dDKcPJvrSbndL7L8",
-    authDomain: "portfolio-e7706.firebaseapp.com",
-    databaseURL: "https://portfolio-e7706-default-rtdb.firebaseio.com",
-    projectId: "portfolio-e7706",
-    storageBucket: "portfolio-e7706.firebasestorage.app",
-    messagingSenderId: "256442360821",
-    appId: "1:256442360821:web:cba2f574b3099da79936bc"
-  };
+/* ══════════════════ 설정 ══════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCwUS9-uzZtmXzeIC-dDKcPJvrSbndL7L8",
+  authDomain: "portfolio-e7706.firebaseapp.com",
+  databaseURL: "https://portfolio-e7706-default-rtdb.firebaseio.com",
+  projectId: "portfolio-e7706",
+  storageBucket: "portfolio-e7706.firebasestorage.app",
+  messagingSenderId: "256442360821",
+  appId: "1:256442360821:web:cba2f574b3099da79936bc"
+};
 
-  const app  = initializeApp(firebaseConfig);
-  const db   = getDatabase(app);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+const FINNHUB_KEY = 'd803iupr01qj3ct8tn40d803iupr01qj3ct8tn4g';
+const GH_REPO     = 'seolheesloth/portfolio';
+const AUTO_MS     = 60 * 60 * 1000;   // 1시간
+const LEGACY_PATH = 'portfolio';      // 로그인 도입 전 공용 경로 (1회 이관용)
 
-  let DB_REF = null;
-  let unsubscribe = null;
+const DEFAULT_ROWS = [
+  { ticker: 'AAPL', price: '', shares1: '10', shares2: '', shares3: '' },
+  { ticker: 'NVDA', price: '', shares1: '5',  shares2: '', shares3: '' },
+  { ticker: 'MSFT', price: '', shares1: '8',  shares2: '', shares3: '' },
+  { ticker: 'TSLA', price: '', shares1: '15', shares2: '', shares3: '' },
+  { ticker: '',     price: '', shares1: '',   shares2: '', shares3: '' },
+];
 
-  // Google 로그인
-  window.googleLogin = async function() {
-    try { await signInWithPopup(auth, provider); }
-    catch(e) { alert('로그인 실패: ' + e.message); }
-  };
+/* ══════════════════ 상태 ══════════════════ */
+const app  = initializeApp(firebaseConfig);
+const db   = getDatabase(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-  // 로그아웃
-  window.googleLogout = async function() {
-    if (unsubscribe) unsubscribe();
-    await signOut(auth);
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('user-bar').style.display = 'none';
-  };
+let rows = [];
+let dbRef = null;
+let unsubscribe = null;
+let saveTimer = null;
+let fetchTimer = {};
+let bulkMode = false;              // 일괄 갱신 중에는 행 단위 recalc/save 생략
+let lastRefreshTime = Date.now();
+let inactivityTimer = null;
+let autoCheckedOnLoad = false;
+let autoRunning = false;
+let pendingEcho = 0;               // 내 저장의 로컬 에코 횟수 — 에코 때는 화면을 다시 그리지 않음
 
-  // Auth 상태 감지
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      // 로그인됨
-      document.getElementById('login-screen').style.display = 'none';
-      const bar = document.getElementById('user-bar');
-      bar.style.display = 'flex';
-      document.getElementById('user-photo').src = user.photoURL || '';
-      document.getElementById('user-name').textContent = user.displayName || user.email;
+/* ══════════════════ 유틸 ══════════════════ */
+const $ = id => document.getElementById(id);
 
-      // 유저별 DB 경로
-      DB_REF = ref(db, 'portfolio');
-      startListening();
-    } else {
-      document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('user-bar').style.display = 'none';
-    }
-  });
+// Firebase는 undefined를 거부하므로 항상 문자열로 정규화
+const str = v => (v === undefined || v === null) ? '' : String(v);
 
-  function startListening() {
-    if (unsubscribe) unsubscribe();
-    unsubscribe = onValue(DB_REF, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) {
-        rows = DEFAULT_ROWS.map(x => ({...x}));
-        renderRows();
-        return;
-      }
-      isLoading = true;
-      rows = (data.rows || DEFAULT_ROWS.map(x => ({...x}))).map(r => ({
-        ticker: r.ticker, price: r.price,
-        shares1: r.shares1, shares2: r.shares2, shares3: r.shares3,
-        // 정산 기준값을 함께 복원 → 에코로 화면이 다시 그려져도 현금 정산 기준이 어긋나지 않음
-        _committedShares1: (r.committed !== undefined && r.committed !== null) ? r.committed : (r.shares1 !== undefined ? r.shares1 : '0')
-      }));
-      if (data.budget2) document.getElementById('acct2-budget').value = data.budget2;
-      if (data.budget3) document.getElementById('acct3-budget').value = data.budget3;
-      if (data.cash1)   document.getElementById('cash1').value = data.cash1;
-      if (data.cash2)   document.getElementById('cash2-held').value = data.cash2;
-      if (data.cash3)   document.getElementById('cash3-held').value = data.cash3;
-      if (data.auto2 !== undefined) document.getElementById('auto2').checked = data.auto2;
-      if (data.auto3 !== undefined) document.getElementById('auto3').checked = data.auto3;
-      if (data.h1)      document.getElementById('h-acct1').value = data.h1;
-      if (data.h2)      document.getElementById('h-acct2').value = data.h2;
-      if (data.h3)      document.getElementById('h-acct3').value = data.h3;
-      if (data.lastRefresh) lastRefreshTime = data.lastRefresh;
-      isLoading = false;
-      renderRows();
-      setSyncStatus('synced');
-      showLastUpdated();   // 마지막 갱신 시각을 CASH 행에 표시 (페이지 열 때부터 보이게)
+// value 속성에 넣을 값 이스케이프 (따옴표 입력 시 마크업 깨짐 방지)
+const esc = v => str(v).replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
-      // 페이지 열 때 1회: 마지막 갱신이 1시간 넘었으면 자동 갱신 + 보유기록
-      if (!autoCheckedOnLoad) {
-        autoCheckedOnLoad = true;
-        if (lastRefreshTime && (Date.now() - lastRefreshTime > AUTO_MS)) {
-          setTimeout(() => autoUpdate('page-load'), 800);
-        } else {
-          resetInactivityTimer();   // 최신이면 비활성 타이머만 시작
-        }
-      }
-    });
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+
+function fmt$(n) {
+  const v = parseFloat(n);
+  if (isNaN(v)) return '—';
+  return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function setSyncStatus(status) {
+  const el = $('sync-status');
+  if (!el) return;
+  el.className = 'sync-status ' + status;
+  el.textContent = status === 'synced' ? '✓ Synced'
+                 : status === 'saving' ? '↑ Saving...'
+                 : '✕ Error';
+}
+
+/* ══════════════════ 인증 ══════════════════ */
+window.googleLogin = async function() {
+  $('login-error').textContent = '';
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    $('login-error').textContent = '로그인하지 못했습니다. 다시 시도해 주세요.';
+    console.error(e);
   }
+};
 
-  const FINNHUB_KEY = 'd803iupr01qj3ct8tn40d803iupr01qj3ct8tn4g';
+window.googleLogout = async function() {
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  dbRef = null;
+  await signOut(auth);
+};
 
-  const DEFAULT_ROWS = [
-    { ticker: 'AAPL', price: '', shares1: '10', shares2: '', shares3: '' },
-    { ticker: 'NVDA', price: '', shares1: '5',  shares2: '', shares3: '' },
-    { ticker: 'MSFT', price: '', shares1: '8',  shares2: '', shares3: '' },
-    { ticker: 'TSLA', price: '', shares1: '15', shares2: '', shares3: '' },
-    { ticker: '',     price: '', shares1: '',   shares2: '', shares3: '' },
-  ];
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    $('login-screen').style.display = 'flex';
+    $('user-bar').style.display = 'none';
+    return;
+  }
+  $('login-screen').style.display = 'none';
+  $('user-bar').style.display = 'flex';
+  $('user-photo').src = user.photoURL || '';
+  $('user-name').textContent = user.displayName || user.email;
 
-  window.rows = [];
-  let rows = window.rows;
-  let fetchTimer = {};
-  let saveTimer  = null;
-  let isLoading  = false;
+  // 계정별 저장 경로 — 다른 사람이 로그인해도 데이터가 섞이지 않음
+  dbRef = ref(db, 'portfolios/' + user.uid);
+  await migrateLegacyIfNeeded();
+  startListening();
+});
 
-  // ── 자동 갱신 (1시간 비활성 / 페이지 열 때 오래된 정보면) ──
-  const AUTO_MS = 60 * 60 * 1000;       // 1시간
-  let lastRefreshTime = Date.now();     // 마지막 가격 갱신 시각 (Firebase에 저장/복원)
-  let inactivityTimer = null;
-  let autoCheckedOnLoad = false;
-  let autoRunning = false;
+// 로그인 도입 이전 공용 경로에 남아 있던 데이터를 최초 1회만 내 경로로 복사
+async function migrateLegacyIfNeeded() {
+  try {
+    const mine = await get(dbRef);
+    if (mine.exists()) return;
+    const legacy = await get(ref(db, LEGACY_PATH));
+    if (legacy.exists()) await set(dbRef, legacy.val());
+  } catch (e) {
+    console.warn('legacy migration skipped:', e.message);
+  }
+}
 
-  async function autoUpdate(reason) {
-    if (autoRunning) return;
-    autoRunning = true;
+/* ══════════════════ 저장 / 불러오기 ══════════════════ */
+window.saveData = function() {
+  if (!dbRef) return;
+  clearTimeout(saveTimer);
+  setSyncStatus('saving');
+  saveTimer = setTimeout(async () => {
     try {
-      await refreshAllPrices();   // 가격 갱신 (내부에서 lastRefreshTime 갱신)
-      if (window.snapshotAll) snapshotAll();  // 보유기록
-      showLastUpdated(true);      // '⟳ 자동 갱신 [시각]' 표시
-    } catch(e) {}
-    autoRunning = false;
-    resetInactivityTimer();   // 다음 1시간 타이머 재시작
-  }
-
-  function resetInactivityTimer() {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => autoUpdate('inactivity'), AUTO_MS);
-  }
-
-  // 마지막 갱신 시각을 CASH 행에 표시 (auto=자동갱신 여부)
-  function showLastUpdated(auto) {
-    const el = document.getElementById('last-updated');
-    if (!el || !lastRefreshTime) return;
-    const d = new Date(lastRefreshTime);
-    const now = new Date();
-    const sameDay = d.toDateString() === now.toDateString();
-    const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const stamp = sameDay ? time : d.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    el.textContent = (auto ? '⟳ 자동 갱신 ' : 'Updated ') + stamp;
-  }
-
-  // 사용자 활동 감지 → 비활성 타이머 리셋
-  ['click', 'keydown', 'input', 'touchstart'].forEach(ev =>
-    document.addEventListener(ev, resetInactivityTimer, { passive: true }));
-
-  function setSyncStatus(status) {
-    const el = document.getElementById('sync-status');
-    el.className = 'sync-status ' + status;
-    el.textContent = status === 'synced' ? '✓ Synced' : status === 'saving' ? '↑ Saving...' : '✕ Error';
-  }
-
-  // ── GitHub 최신 커밋(버전) 표시 ──
-  async function loadVersion() {
-    const el = document.getElementById('version-tag');
-    if (!el) return;
-    try {
-      const res  = await fetch('https://api.github.com/repos/seolheesloth/portfolio/commits?per_page=1');
-      const data = await res.json();
-      if (Array.isArray(data) && data[0] && data[0].commit) {
-        const msg  = (data[0].commit.message || '').split('\n')[0].trim();
-        const when = new Date(data[0].commit.committer.date);
-        const timeStr = when.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        // 상대 시간 (배포 시차 파악용)
-        const diffMin = Math.max(0, Math.round((Date.now() - when.getTime()) / 60000));
-        let rel;
-        if (diffMin < 1)        rel = '방금';
-        else if (diffMin < 60)  rel = diffMin + '분 전';
-        else if (diffMin < 1440) rel = Math.round(diffMin / 60) + '시간 전';
-        else                    rel = Math.round(diffMin / 1440) + '일 전';
-        const displayMsg = (msg || '(no message)').replace(/^Update\b/, 'Ver.');
-        el.textContent = '📦 ' + displayMsg + ' · ' + timeStr + ' (' + rel + ')';
-      } else {
-        el.textContent = '📦 버전 정보 없음';
-      }
-    } catch(e) {
-      el.textContent = '📦 버전 확인 실패';
-    }
-  }
-  loadVersion();
-
-
-  // ── Save to Firebase (debounced) ──
-  window.saveData = function() {
-    clearTimeout(saveTimer);
-    setSyncStatus('saving');
-    saveTimer = setTimeout(async () => {
-      try {
-        const data = {
-          rows: rows.map(r => ({ ticker: r.ticker, price: r.price, shares1: r.shares1, shares2: r.shares2, shares3: r.shares3, committed: (r._committedShares1 !== undefined ? r._committedShares1 : r.shares1) })),
-          budget2: document.getElementById('acct2-budget').value,
-          budget3: document.getElementById('acct3-budget').value,
-          cash1:   document.getElementById('cash1').value,
-          cash2:   document.getElementById('cash2-held').value,
-          cash3:   document.getElementById('cash3-held').value,
-          auto2:   document.getElementById('auto2').checked,
-          auto3:   document.getElementById('auto3').checked,
-          h1:      document.getElementById('h-acct1').value,
-          h2:      document.getElementById('h-acct2').value,
-          h3:      document.getElementById('h-acct3').value,
-          lastRefresh: lastRefreshTime,
-        };
-        if (!DB_REF) return;
-        await set(DB_REF, data);
-        setSyncStatus('synced');
-      } catch(e) {
-        setSyncStatus('error');
-      }
-    }, 800);
-  };
-
-
-
-  // ── Formatting ──
-  function fmt$(n) {
-    const num = parseFloat(n);
-    if (isNaN(num)) return '—';
-    return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function getTotal1() {
-    const stockTotal = rows.reduce((s, r) => {
-      const v = parseFloat(r.price) * parseFloat(r.shares1);
-      return s + (isNaN(v) ? 0 : v);
-    }, 0);
-    return stockTotal + (parseFloat(document.getElementById('cash1').value) || 0);
-  }
-
-  // ── Recalc ──
-  // 특정 계좌의 실제 보유 자산 합 = Σ(보유주식 × 현재가) + 보유현금
-  function accountTotal(acct) {
-    let sum = 0;
-    rows.forEach(r => {
-      const held = parseFloat(r['shares' + acct]);
-      const price = parseFloat(r.price);
-      if (!isNaN(held) && !isNaN(price)) sum += held * price;
-    });
-    const cashEl = document.getElementById('cash' + acct + '-held');
-    sum += parseFloat(cashEl ? cashEl.value : 0) || 0;
-    return sum;
-  }
-
-  window.recalc = function() {
-    const total1  = getTotal1();
-
-    // Account 2,3 Total Value: 자동 모드면 입력값을 잠그되, 수기로 넣은 값이 있으면 그대로 유지(기준점).
-    // 값이 비어있을 때만 보유 자산 합으로 1회 자동 채움.
-    ['2','3'].forEach(acct => {
-      const autoEl   = document.getElementById('auto' + acct);
-      const budgetEl = document.getElementById('acct' + acct + '-budget');
-      if (autoEl && autoEl.checked) {
-        const cur = parseFloat(budgetEl.value);
-        if (isNaN(cur) || cur <= 0) {
-          // 수기값이 없을 때만 자동 계산값으로 채움
-          const auto = accountTotal(acct);
-          budgetEl.value = auto > 0 ? auto.toFixed(2) : '';
-        }
-        // 수기값이 이미 있으면 건드리지 않음 (기준점 보존)
-        budgetEl.readOnly = true;
-      } else if (budgetEl) {
-        budgetEl.readOnly = false;
-      }
-    });
-
-    const budget2 = parseFloat(document.getElementById('acct2-budget').value) || 0;
-    const budget3 = parseFloat(document.getElementById('acct3-budget').value) || 0;
-    document.getElementById('acct1-total').textContent = fmt$(total1);
-    let alloc2 = 0, alloc3 = 0;
-
-    rows.forEach((r, i) => {
-      const price = parseFloat(r.price), shares1 = parseFloat(r.shares1);
-      const val1  = isNaN(price * shares1) ? 0 : price * shares1;
-      const pct   = total1 > 0 ? val1 / total1 : 0;
-
-      const sub1 = document.getElementById(`sub1-${i}`);
-      const pct1 = document.getElementById(`pct1-${i}`);
-      if (sub1) sub1.textContent = val1 > 0 ? fmt$(val1) : '—';
-      if (pct1) pct1.textContent = (total1 > 0 && val1 > 0) ? (pct*100).toFixed(1)+'%' : '';
-
-      ['2','3'].forEach(n => {
-        const budget = n === '2' ? budget2 : budget3;
-        const res  = document.getElementById(`res${n}-${i}`);
-        const sub  = document.getElementById(`sub${n}-${i}`);
-        const pctEl= document.getElementById(`pct${n}-${i}`);
-        if (!res) return;
-        const deltaEl = document.getElementById(`delta${n}-${i}`);
-        // 가격과 예산만 있으면 계산 (목표 비중이 0%여도 = 전량 매도 케이스 처리)
-        if (budget > 0 && price > 0) {
-          const tv  = pct * budget;       // pct가 0이면 목표 금액 0
-          const shs = tv / price;          // 목표 주식수 (0일 수 있음)
-          r['_target' + n] = shs;
-          if (n === '2') alloc2 += tv; else alloc3 += tv;
-
-          if (shs > 0) {
-            res.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
-            res.innerHTML = `${shs.toFixed(2)} <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
-            if (sub)   sub.textContent  = fmt$(tv);
-            if (pctEl) pctEl.textContent= (pct*100).toFixed(1)+'%';
-          } else {
-            // 목표 0주 — 비중 0%
-            res.className = 'result-shares empty';
-            res.innerHTML = `0.00 <span style="font-size:10px;font-weight:400;color:#aaa">shs</span>`;
-            if (sub)   sub.textContent  = '';
-            if (pctEl) pctEl.textContent= '0.0%';
-          }
-
-          // 델타 계산: 목표 - 현재 보유 (보유 미입력은 0주로 간주 → 새 종목은 전량 매수 표시)
-          if (deltaEl) {
-            let held = parseFloat(r['shares' + n]);
-            const heldEmpty = isNaN(held);
-            if (heldEmpty) held = 0;
-            const delta = shs - held;
-            if (heldEmpty && shs === 0) {
-              // 목표도 0이고 보유도 없음 → 표시 안 함
-              deltaEl.className = 'delta flat';
-              deltaEl.innerHTML = '';
-            } else if (Math.abs(delta) < 0.005) {
-              deltaEl.className = 'delta flat';
-              deltaEl.innerHTML = '✓ 일치';
-            } else if (delta > 0) {
-              deltaEl.className = 'delta buy';
-              deltaEl.innerHTML = `+${delta.toFixed(2)} <span class="delta-note">매수</span>`;
-            } else {
-              deltaEl.className = 'delta sell';
-              deltaEl.innerHTML = `−${Math.abs(delta).toFixed(2)} <span class="delta-note">매도</span>`;
-            }
-          }
-        } else {
-          res.className = 'result-shares empty';
-          res.textContent = budget > 0 ? '—' : 'Enter budget →';
-          if (sub)   sub.textContent  = '';
-          if (pctEl) pctEl.textContent= '';
-          if (deltaEl) { deltaEl.className = 'delta flat'; deltaEl.innerHTML = ''; }
-          r['_target' + n] = null;
-        }
+      pendingEcho++;
+      await set(dbRef, {
+        rows: rows.map(r => ({
+          ticker:  str(r.ticker),
+          price:   str(r.price),
+          shares1: str(r.shares1),
+          shares2: str(r.shares2),
+          shares3: str(r.shares3),
+          committed: str(r._committed !== undefined ? r._committed : r.shares1)
+        })),
+        budget2: str($('acct2-budget').value),
+        budget3: str($('acct3-budget').value),
+        cash1:   str($('cash1').value),
+        cash2:   str($('cash2-held').value),
+        cash3:   str($('cash3-held').value),
+        auto2:   $('auto2').checked,
+        auto3:   $('auto3').checked,
+        h1:      str($('h-acct1').value),
+        h2:      str($('h-acct2').value),
+        h3:      str($('h-acct3').value),
+        lastRefresh: lastRefreshTime
       });
-    });
-
-    // Cash
-    const cv   = parseFloat(document.getElementById('cash1').value) || 0;
-    const cpct = total1 > 0 ? cv / total1 : 0;
-    document.getElementById('cash1-sub').textContent = cv > 0 ? fmt$(cv) : '—';
-    document.getElementById('cash1-pct').textContent = (cv > 0 && total1 > 0) ? (cpct*100).toFixed(1)+'%' : '';
-
-    ['2','3'].forEach(n => {
-      const budget = n === '2' ? budget2 : budget3;
-      const amtEl  = document.getElementById(`cash${n}-amount`);
-      const pctEl  = document.getElementById(`cash${n}-pct`);
-      if (budget > 0 && cpct > 0) {
-        const t = cpct * budget;
-        if (n === '2') alloc2 += t; else alloc3 += t;
-        amtEl.className = `result-shares ${n === '2' ? 'green' : 'purple'}`;
-        amtEl.textContent = fmt$(t);
-        pctEl.textContent = (cpct*100).toFixed(1)+'%';
-      } else {
-        amtEl.className = 'result-shares empty';
-        amtEl.textContent = budget > 0 ? '—' : 'Enter budget →';
-        pctEl.textContent = '';
-      }
-    });
-
-    document.getElementById('acct2-allocated').textContent = fmt$(alloc2);
-    document.getElementById('acct3-allocated').textContent = fmt$(alloc3);
-  };
-
-  // ── Row update helpers (accessible from inline handlers) ──
-  window.updateTicker = function(i, val) {
-    rows[i].ticker = val.toUpperCase();
-    document.getElementById('ticker-'+i).value = val.toUpperCase();
-    saveData();
-  };
-  window.updatePrice = function(i, val) {
-    rows[i].price = val;
-    recalc();
-    saveData();
-  };
-  window.updateShares = function(i, val) {
-    rows[i].shares1 = val;
-    recalc();
-    saveData();
-  };
-
-  // 수량 편집 시작 시점의 값 기억 (모바일 호환을 위해 focus에 의존하지 않음)
-  window.rememberShares = function(i) {
-    // 호환용으로 남겨두지만, 실제 기준값은 rows[i]._committedShares1을 사용
-    if (rows[i]._committedShares1 === undefined) {
-      rows[i]._committedShares1 = rows[i].shares1 || '0';
+      setSyncStatus('synced');
+    } catch (e) {
+      pendingEcho = 0;
+      setSyncStatus('error');
+      console.error('save failed:', e);
     }
-  };
+  }, 800);
+};
 
-  // 수량 변경 완료(칸 벗어남) 시 현금 자동 반영 (PC). 모바일에서 이 이벤트가 누락돼도
-  // '가격 갱신' 시 settleSharesCash()가 동일하게 정산하므로 둘 중 하나만 동작해도 정확함.
-  window.applyCashFromShares = async function(i, newVal) {
-    const toggle = document.getElementById('auto-cash-toggle');
-    if (!toggle || !toggle.checked) return;
-    let oldQ = parseFloat(rows[i]._committedShares1);
-    if (isNaN(oldQ)) oldQ = 0;
-    const newQ  = parseFloat(newVal) || 0;
-    const delta = newQ - oldQ;
-    if (Math.abs(delta) < 0.0001) return;
+function startListening() {
+  if (unsubscribe) unsubscribe();
+  unsubscribe = onValue(dbRef, snapshot => {
+    // 내가 방금 저장한 데이터의 에코면 화면을 다시 그리지 않음 (입력 중 포커스 손실 방지)
+    if (pendingEcho > 0) { pendingEcho--; setSyncStatus('synced'); return; }
 
-    let price = parseFloat(rows[i].price) || 0;
-    if (price <= 0 && rows[i].ticker) {
-      await fetchPrice(rows[i].ticker, i);
-      price = parseFloat(rows[i].price) || 0;
-    }
-    if (price <= 0) {
-      // 가격이 아직 없으면 지금 정산하지 않음 → _committedShares1을 그대로 둬서
-      // '가격 갱신'을 누를 때 settleSharesCash()가 차액을 정산하도록 함
+    const data = snapshot.val();
+
+    if (!data) {
+      rows = DEFAULT_ROWS.map(r => ({ ...r }));
+      renderRows();
+      afterLoad();
       return;
     }
 
-    const cashEl  = document.getElementById('cash1');
-    const curCash = parseFloat(cashEl.value) || 0;
-    cashEl.value  = (curCash - delta * price).toFixed(2);  // 매수(+delta)→감소, 매도(-delta)→증가
-    rows[i]._committedShares1 = String(newQ);
-    recalc();
-    saveData();
-  };
+    rows = (data.rows || DEFAULT_ROWS).map(r => ({
+      ticker:  str(r.ticker),
+      price:   str(r.price),
+      shares1: str(r.shares1),
+      shares2: str(r.shares2),
+      shares3: str(r.shares3),
+      // 정산 기준값도 함께 복원 → 화면이 다시 그려져도 현금 정산 기준이 어긋나지 않음
+      _committed: str(r.committed !== undefined ? r.committed : r.shares1)
+    }));
 
-  // 모든 종목의 '현재 수량 vs 마지막 정산 수량' 차이를 현금에 일괄 정산
-  // (모바일에서 onchange 누락 대비 — '가격 갱신' 시 호출)
-  function settleSharesCash() {
-    const toggle = document.getElementById('auto-cash-toggle');
-    if (!toggle || !toggle.checked) return;
-    const cashEl = document.getElementById('cash1');
-    let cash = parseFloat(cashEl.value) || 0;
-    let changed = false;
+    if (data.budget2 !== undefined) $('acct2-budget').value = str(data.budget2);
+    if (data.budget3 !== undefined) $('acct3-budget').value = str(data.budget3);
+    if (data.cash1   !== undefined) $('cash1').value        = str(data.cash1);
+    if (data.cash2   !== undefined) $('cash2-held').value   = str(data.cash2);
+    if (data.cash3   !== undefined) $('cash3-held').value   = str(data.cash3);
+    if (data.auto2   !== undefined) $('auto2').checked      = data.auto2;
+    if (data.auto3   !== undefined) $('auto3').checked      = data.auto3;
+    if (data.h1) $('h-acct1').value = data.h1;
+    if (data.h2) $('h-acct2').value = data.h2;
+    if (data.h3) $('h-acct3').value = data.h3;
+    if (data.lastRefresh) lastRefreshTime = data.lastRefresh;
+
+    renderRows();
+    setSyncStatus('synced');
+    showLastUpdated(false);
+    afterLoad();
+  }, err => {
+    setSyncStatus('error');
+    console.error('read failed:', err);
+  });
+}
+
+// 페이지를 열 때 1회: 마지막 갱신이 1시간을 넘었으면 자동 갱신
+function afterLoad() {
+  if (autoCheckedOnLoad) return;
+  autoCheckedOnLoad = true;
+  if (lastRefreshTime && (Date.now() - lastRefreshTime > AUTO_MS)) {
+    setTimeout(() => autoUpdate(), 800);
+  } else {
+    resetInactivityTimer();
+  }
+}
+
+/* ══════════════════ 자동 갱신 ══════════════════ */
+async function autoUpdate() {
+  if (autoRunning || !dbRef) return;
+  autoRunning = true;
+  try {
+    await refreshAllPrices();   // 가격만 자동 갱신 — 보유기록은 버튼을 눌렀을 때만
+    showLastUpdated(true);
+  } catch (e) {
+    console.error('auto update failed:', e);
+  } finally {
+    autoRunning = false;
+    resetInactivityTimer();
+  }
+}
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(autoUpdate, AUTO_MS);
+}
+
+function showLastUpdated(auto) {
+  const el = $('last-updated');
+  if (!el || !lastRefreshTime) return;
+  const d = new Date(lastRefreshTime);
+  const sameDay = d.toDateString() === new Date().toDateString();
+  const stamp = sameDay
+    ? d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleString('en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  el.textContent = (auto ? '⟳ 자동 갱신 ' : 'Updated ') + stamp;
+}
+
+['click', 'keydown', 'input', 'touchstart'].forEach(ev =>
+  document.addEventListener(ev, resetInactivityTimer, { passive: true }));
+
+/* ══════════════════ 계산 ══════════════════ */
+function getTotal1() {
+  const stock = rows.reduce((s, r) => s + num(r.price) * num(r.shares1), 0);
+  return stock + num($('cash1').value);
+}
+
+// 특정 계좌의 실제 보유 자산 합 = Σ(보유주식 × 현재가) + 보유현금
+function accountTotal(acct) {
+  const stock = rows.reduce((s, r) => s + num(r['shares' + acct]) * num(r.price), 0);
+  return stock + num($('cash' + acct + '-held').value);
+}
+
+window.recalc = function() {
+  const total1 = getTotal1();
+
+  // 자동 모드: 값이 비어 있을 때만 보유 자산 합으로 1회 채우고, 수기 기준값은 보존
+  ['2', '3'].forEach(acct => {
+    const autoEl = $('auto' + acct);
+    const budgetEl = $('acct' + acct + '-budget');
+    if (autoEl.checked) {
+      if (num(budgetEl.value) <= 0) {
+        const auto = accountTotal(acct);
+        budgetEl.value = auto > 0 ? auto.toFixed(2) : '';
+      }
+      budgetEl.readOnly = true;
+    } else {
+      budgetEl.readOnly = false;
+    }
+  });
+
+  const budgets = { '2': num($('acct2-budget').value), '3': num($('acct3-budget').value) };
+  const alloc   = { '2': 0, '3': 0 };
+  $('acct1-total').textContent = fmt$(total1);
+
+  rows.forEach((r, i) => {
+    const price = num(r.price);
+    const val1  = price * num(r.shares1);
+    const pct   = total1 > 0 ? val1 / total1 : 0;
+
+    const sub1 = $(`sub1-${i}`), pct1 = $(`pct1-${i}`);
+    if (sub1) sub1.textContent = val1 > 0 ? fmt$(val1) : '—';
+    if (pct1) pct1.textContent = (total1 > 0 && val1 > 0) ? (pct * 100).toFixed(1) + '%' : '';
+
+    ['2', '3'].forEach(n => {
+      const res = $(`res${n}-${i}`);
+      if (!res) return;
+      const sub = $(`sub${n}-${i}`), pctEl = $(`pct${n}-${i}`), deltaEl = $(`delta${n}-${i}`);
+      const budget = budgets[n];
+      const color  = n === '2' ? 'brown' : 'purple';
+
+      // 가격과 기준 금액만 있으면 계산 (목표 비중 0% = 전량 매도 케이스도 처리)
+      if (budget > 0 && price > 0) {
+        const tv  = pct * budget;
+        const shs = tv / price;
+        r['_target' + n] = shs;
+        alloc[n] += tv;
+
+        if (shs > 0) {
+          res.className = `result-shares ${color}`;
+          res.innerHTML = `${shs.toFixed(2)} <span class="shs-unit">shs</span>`;
+          if (sub)   sub.textContent   = fmt$(tv);
+          if (pctEl) pctEl.textContent = (pct * 100).toFixed(1) + '%';
+        } else {
+          res.className = 'result-shares empty';
+          res.innerHTML = `0.00 <span class="shs-unit">shs</span>`;
+          if (sub)   sub.textContent   = '';
+          if (pctEl) pctEl.textContent = '0.0%';
+        }
+
+        // 델타 = 목표 − 현재 보유 (보유 미입력은 0주로 간주)
+        if (deltaEl) {
+          const raw = r['shares' + n];
+          const heldEmpty = (raw === '' || raw === undefined || isNaN(parseFloat(raw)));
+          const held  = heldEmpty ? 0 : parseFloat(raw);
+          const delta = shs - held;
+          if (heldEmpty && shs === 0) {
+            deltaEl.className = 'delta flat';
+            deltaEl.innerHTML = '';
+          } else if (Math.abs(delta) < 0.005) {
+            deltaEl.className = 'delta flat';
+            deltaEl.innerHTML = '✓ 일치';
+          } else if (delta > 0) {
+            deltaEl.className = 'delta buy';
+            deltaEl.innerHTML = `+${delta.toFixed(2)} <span class="delta-note">매수</span>`;
+          } else {
+            deltaEl.className = 'delta sell';
+            deltaEl.innerHTML = `−${Math.abs(delta).toFixed(2)} <span class="delta-note">매도</span>`;
+          }
+        }
+      } else {
+        res.className = 'result-shares empty';
+        res.textContent = budget > 0 ? '—' : '기준 금액 입력 →';
+        if (sub)   sub.textContent   = '';
+        if (pctEl) pctEl.textContent = '';
+        if (deltaEl) { deltaEl.className = 'delta flat'; deltaEl.innerHTML = ''; }
+        r['_target' + n] = null;
+      }
+    });
+  });
+
+  // 현금 행
+  const cv   = num($('cash1').value);
+  const cpct = total1 > 0 ? cv / total1 : 0;
+  $('cash1-sub').textContent = cv > 0 ? fmt$(cv) : '—';
+  $('cash1-pct').textContent = (cv > 0 && total1 > 0) ? (cpct * 100).toFixed(1) + '%' : '';
+
+  ['2', '3'].forEach(n => {
+    const budget = budgets[n];
+    const amtEl = $(`cash${n}-amount`), pctEl = $(`cash${n}-pct`);
+    if (budget > 0 && cpct > 0) {
+      const t = cpct * budget;
+      alloc[n] += t;
+      amtEl.className = `result-shares ${n === '2' ? 'brown' : 'purple'}`;
+      amtEl.textContent = fmt$(t);
+      pctEl.textContent = (cpct * 100).toFixed(1) + '%';
+    } else {
+      amtEl.className = 'result-shares empty';
+      amtEl.textContent = budget > 0 ? '—' : '기준 금액 입력 →';
+      pctEl.textContent = '';
+    }
+  });
+
+  $('acct2-allocated').textContent = fmt$(alloc['2']);
+  $('acct3-allocated').textContent = fmt$(alloc['3']);
+};
+
+/* ══════════════════ 행 편집 ══════════════════ */
+window.updateTicker = function(i, val) {
+  rows[i].ticker = val.toUpperCase();
+  $('ticker-' + i).value = rows[i].ticker;
+  saveData();
+};
+
+window.updatePrice = function(i, val) {
+  rows[i].price = val;
+  recalc();
+  saveData();
+};
+
+window.updateShares = function(i, val) {
+  rows[i].shares1 = val;
+  recalc();
+  saveData();
+};
+
+window.updateHeld = function(i, acct, val) {
+  rows[i]['shares' + acct] = val;
+  recalc();
+  saveData();
+};
+
+// 수량 변경 확정 시 현금 자동 반영 (PC).
+// 모바일에서 change 이벤트가 누락돼도 '가격 갱신' 시 settleSharesCash()가 같은 정산을 수행함.
+window.applyCashFromShares = async function(i, newVal) {
+  if (!$('auto-cash-toggle').checked) return;
+  const oldQ  = num(rows[i]._committed);
+  const newQ  = num(newVal);
+  const delta = newQ - oldQ;
+  if (Math.abs(delta) < 0.0001) return;
+
+  let price = num(rows[i].price);
+  if (price <= 0 && rows[i].ticker) {
+    await fetchPrice(rows[i].ticker, i);
+    price = num(rows[i].price);
+  }
+  // 가격이 아직 없으면 정산 보류 → _committed를 그대로 둬서 다음 '가격 갱신' 때 정산됨
+  if (price <= 0) return;
+
+  const cashEl = $('cash1');
+  cashEl.value = (num(cashEl.value) - delta * price).toFixed(2);  // 매수→감소, 매도→증가
+  rows[i]._committed = String(newQ);
+  recalc();
+  saveData();
+};
+
+// 모든 종목의 '현재 수량 vs 마지막 정산 수량' 차이를 현금에 일괄 정산
+function settleSharesCash() {
+  if (!$('auto-cash-toggle').checked) return;
+  const cashEl = $('cash1');
+  let cash = num(cashEl.value);
+  let changed = false;
+  rows.forEach(r => {
+    const delta = num(r.shares1) - num(r._committed);
+    const price = num(r.price);
+    if (Math.abs(delta) > 0.0001 && price > 0) {
+      cash -= delta * price;
+      r._committed = String(num(r.shares1));
+      changed = true;
+    }
+  });
+  if (changed) cashEl.value = cash.toFixed(2);
+}
+
+window.addRow = function() {
+  rows.unshift({ ticker: '', price: '', shares1: '', shares2: '', shares3: '', _committed: '0' });
+  renderRows();
+  saveData();
+};
+
+window.deleteRow = async function(i) {
+  if (rows.length <= 1) return;
+  // 자동 현금 반영이 켜져 있으면 행 삭제 = 전량 매도 → 보유수량 × 가격만큼 현금 환원
+  if ($('auto-cash-toggle').checked) {
+    const qty = num(rows[i].shares1);
+    if (qty > 0) {
+      let price = num(rows[i].price);
+      if (price <= 0 && rows[i].ticker) {
+        await fetchPrice(rows[i].ticker, i);
+        price = num(rows[i].price);
+      }
+      if (price > 0) {
+        const cashEl = $('cash1');
+        cashEl.value = (num(cashEl.value) + qty * price).toFixed(2);
+      }
+    }
+  }
+  rows.splice(i, 1);
+  renderRows();
+  saveData();
+};
+
+window.sortAlpha = function() {
+  rows.sort((a, b) => {
+    if (!a.ticker && !b.ticker) return 0;
+    if (!a.ticker) return 1;
+    if (!b.ticker) return -1;
+    return a.ticker.localeCompare(b.ticker);
+  });
+  renderRows();
+  saveData();
+};
+
+// 계산된 목표 주식수를 Account 2·3의 '보유'로 일괄 기록
+window.snapshotAll = function() {
+  ['2', '3'].forEach(acct => {
     rows.forEach(r => {
-      let committed = parseFloat(r._committedShares1);
-      if (isNaN(committed)) committed = 0;
-      const current = parseFloat(r.shares1) || 0;
-      const price   = parseFloat(r.price) || 0;
-      const delta   = current - committed;
-      if (Math.abs(delta) > 0.0001 && price > 0) {
-        cash -= delta * price;
-        r._committedShares1 = String(current);
-        changed = true;
-      }
+      const t = r['_target' + acct];
+      if (t != null && !isNaN(t)) r['shares' + acct] = t.toFixed(2);
     });
-    if (changed) { cashEl.value = cash.toFixed(2); }
+  });
+  renderRows();
+  saveData();
+
+  const btn = $('snapshot-btn');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '✓ 기록됨';
+    setTimeout(() => { btn.textContent = orig; }, 1200);
   }
-  window.updateHeld = function(i, acct, val) {
-    rows[i]['shares' + acct] = val;
-    recalc();
-    saveData();
-  };
+};
 
-  // 현재 계산된 목표 주식수를 "보유"로 일괄 저장 (Account 2,3 모두, 팝업 없음)
-  window.snapshotAll = function() {
-    ['2','3'].forEach(acct => {
-      rows.forEach(r => {
-        const t = r['_target' + acct];
-        if (t != null && !isNaN(t)) r['shares' + acct] = t.toFixed(2);
-      });
-    });
-    renderRows();
-    saveData();
-    // 버튼에 잠깐 피드백
-    const btn = document.getElementById('snapshot-btn');
-    if (btn) {
-      const orig = btn.textContent;
-      btn.textContent = '✓ 기록됨';
-      setTimeout(() => { btn.textContent = orig; }, 1200);
+/* ══════════════════ 렌더링 ══════════════════ */
+window.renderRows = function() {
+  document.querySelectorAll('.row-stock').forEach(el => el.remove());
+  const cashRow = $('cash-row');
+
+  rows.forEach((r, i) => {
+    if (r._committed === undefined) r._committed = str(r.shares1) || '0';
+
+    const tr = document.createElement('tr');
+    tr.className = 'row-stock';
+    tr.innerHTML = `
+      <td class="c-ticker">
+        <div class="ticker-row">
+          <input class="ticker-input" type="text" placeholder="TICKER" maxlength="6"
+            id="ticker-${i}" value="${esc(r.ticker)}"
+            oninput="updateTicker(${i}, this.value)"
+            onblur="onTickerBlur(${i})">
+          <button class="del-btn" onclick="deleteRow(${i})" aria-label="${esc(r.ticker) || '빈 행'} 삭제">×</button>
+        </div>
+        <div class="price-wrap">
+          <span class="price-sym">$</span>
+          <input class="price-input" type="number" placeholder="0.00" step="0.01"
+            id="price-${i}" value="${esc(r.price)}"
+            oninput="updatePrice(${i}, this.value)">
+        </div>
+      </td>
+      <td class="c-acct1">
+        <input class="shares-input" type="number" placeholder="# shares" step="0.001"
+          value="${esc(r.shares1)}"
+          oninput="updateShares(${i}, this.value)"
+          onchange="applyCashFromShares(${i}, this.value)">
+        <div class="cell-sub">
+          <span id="sub1-${i}">—</span>
+          <span class="badge badge-blue" id="pct1-${i}"></span>
+        </div>
+      </td>
+      <td class="c-acct2">
+        <span class="result-shares brown empty" id="res2-${i}">기준 금액 입력 →</span>
+        <div class="cell-sub">
+          <span id="sub2-${i}"></span>
+          <span class="badge badge-brown" id="pct2-${i}"></span>
+        </div>
+        <div class="held-wrap">
+          <span class="held-label">보유</span>
+          <input class="held-input" type="number" placeholder="0" step="0.001"
+            value="${esc(r.shares2)}"
+            oninput="updateHeld(${i}, '2', this.value)">
+        </div>
+        <span class="delta flat" id="delta2-${i}"></span>
+      </td>
+      <td class="c-acct3">
+        <span class="result-shares purple empty" id="res3-${i}">기준 금액 입력 →</span>
+        <div class="cell-sub">
+          <span id="sub3-${i}"></span>
+          <span class="badge badge-purple" id="pct3-${i}"></span>
+        </div>
+        <div class="held-wrap">
+          <span class="held-label">보유</span>
+          <input class="held-input" type="number" placeholder="0" step="0.001"
+            value="${esc(r.shares3)}"
+            oninput="updateHeld(${i}, '3', this.value)">
+        </div>
+        <span class="delta flat" id="delta3-${i}"></span>
+      </td>
+    `;
+    cashRow.insertAdjacentElement('beforebegin', tr);
+  });
+
+  recalc();
+};
+
+/* ══════════════════ 시세 조회 ══════════════════ */
+async function fetchPrice(ticker, index) {
+  if (!ticker) return;
+  try {
+    const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !data.c || data.c <= 0) return;
+    // 조회하는 사이 행이 삭제·재정렬됐으면 무시 (다른 행에 가격이 들어가는 것 방지)
+    if (!rows[index] || rows[index].ticker !== ticker) return;
+
+    rows[index].price = String(data.c);
+    const priceEl = $('price-' + index);
+    if (priceEl) {
+      priceEl.value = data.c.toFixed(2);
+      priceEl.classList.add('live');
+      setTimeout(() => priceEl.classList.remove('live'), 2000);
     }
-  };
+    lastRefreshTime = Date.now();
 
-  // ── Render rows ──
-  window.renderRows = function() {
-    document.querySelectorAll('.row-stock').forEach(r => r.remove());
-    const cashRow = document.getElementById('cash-row');
+    // 일괄 갱신 중에는 마지막에 한 번만 recalc/save
+    if (!bulkMode) {
+      recalc();
+      saveData();
+      showLastUpdated(false);
+    }
+  } catch (e) {
+    console.warn('price fetch failed:', ticker, e.message);
+  }
+}
+
+window.refreshAllPrices = async function() {
+  const btn = $('refresh-btn');
+  if (btn) btn.disabled = true;
+
+  const oldPrices = rows.map(r => num(r.price));
+  bulkMode = true;
+  try {
+    await Promise.all(rows.map((r, i) => r.ticker ? fetchPrice(r.ticker, i) : null));
+  } finally {
+    bulkMode = false;
+    if (btn) btn.disabled = false;
+  }
+
+  // 미정산 수량 변경(새 종목 추가/수량 수정)을 현금에 일괄 정산
+  // → 모바일에서 change 이벤트가 누락돼도 '가격 갱신' 한 번으로 현금이 맞춰짐
+  settleSharesCash();
+
+  // 자동 모드인 Account 2·3은 기존 기준 금액에 '주가 변동분'만 반영
+  ['2', '3'].forEach(acct => {
+    if (!$('auto' + acct).checked) return;
+    let delta = 0;
     rows.forEach((r, i) => {
-      // 현금 정산 기준값 최초 초기화 (이후엔 applyCashFromShares가 관리)
-      if (r._committedShares1 === undefined) r._committedShares1 = r.shares1 || '0';
-      const tr = document.createElement('tr');
-      tr.className = 'row-stock';
-      tr.innerHTML = `
-        <td class="c-ticker">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-            <input class="ticker-input" type="text" placeholder="TICKER" maxlength="6"
-              id="ticker-${i}" value="${r.ticker}" style="margin-bottom:0;"
-              oninput="updateTicker(${i},this.value)"
-              onblur="onTickerBlur(${i})">
-            <button onclick="deleteRow(${i})" style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;background:none;border:none;color:#ccc;cursor:pointer;padding:0 0 0 4px;" onmouseover="this.style.color='#b83232'" onmouseout="this.style.color='#ccc'">×</button>
-          </div>
-          <div class="price-wrap">
-            <span class="price-sym">$</span>
-            <input class="price-input" type="number" placeholder="0.00" step="0.01"
-              id="price-${i}" value="${r.price}"
-              oninput="updatePrice(${i},this.value)">
-          </div>
-        </td>
-        <td class="c-acct1">
-          <input class="shares-input" type="number" placeholder="# shares" step="0.001"
-            value="${r.shares1}"
-            onfocus="rememberShares(${i})"
-            oninput="updateShares(${i},this.value)"
-            onchange="applyCashFromShares(${i},this.value)">
-          <div class="cell-sub">
-            <span id="sub1-${i}">—</span>
-            <span class="badge badge-blue" id="pct1-${i}"></span>
-          </div>
-        </td>
-        <td class="c-acct2">
-          <span class="result-shares green empty" id="res2-${i}">Enter budget →</span>
-          <div class="cell-sub">
-            <span id="sub2-${i}"></span>
-            <span class="badge badge-green" id="pct2-${i}"></span>
-          </div>
-          <div class="held-wrap">
-            <span class="held-label">보유</span>
-            <input class="held-input" type="number" placeholder="0" step="0.001"
-              value="${r.shares2 || ''}"
-              oninput="updateHeld(${i},'2',this.value)">
-          </div>
-          <span class="delta flat" id="delta2-${i}"></span>
-        </td>
-        <td class="c-acct3">
-          <span class="result-shares purple empty" id="res3-${i}">Enter budget →</span>
-          <div class="cell-sub">
-            <span id="sub3-${i}"></span>
-            <span class="badge badge-purple" id="pct3-${i}"></span>
-          </div>
-          <div class="held-wrap">
-            <span class="held-label">보유</span>
-            <input class="held-input" type="number" placeholder="0" step="0.001"
-              value="${r.shares3 || ''}"
-              oninput="updateHeld(${i},'3',this.value)">
-          </div>
-          <span class="delta flat" id="delta3-${i}"></span>
-        </td>
-      `;
-      cashRow.insertAdjacentElement('beforebegin', tr);
+      const held = parseFloat(r['shares' + acct]);
+      const newP = num(r.price), oldP = oldPrices[i];
+      if (!isNaN(held) && oldP > 0 && newP > 0) delta += held * (newP - oldP);
     });
-    recalc();
-  };
+    const budgetEl = $('acct' + acct + '-budget');
+    const cur = num(budgetEl.value);
+    if (cur > 0 && Math.abs(delta) > 0.005) budgetEl.value = (cur + delta).toFixed(2);
+  });
 
-  // ── Price fetching ──
-  async function fetchPrice(ticker, index) {
-    if (!ticker) return;
-    const priceEl = document.getElementById(`price-${index}`);
+  lastRefreshTime = Date.now();
+  recalc();
+  saveData();
+  showLastUpdated(false);
+};
 
-    // Use Finnhub without custom headers to avoid CORS preflight
-    try {
-      const res  = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`);
-      const data = await res.json();
-      if (data && data.c && data.c > 0) {
-        rows[index].price = data.c.toString();
-        if (priceEl) {
-          priceEl.value = data.c.toFixed(2);
-          priceEl.classList.add('live');
-          setTimeout(() => priceEl.classList.remove('live'), 2000);
-        }
-        recalc();
-        saveData();
-        lastRefreshTime = Date.now();
-        showLastUpdated(false);
-      }
-    } catch(e) {}
+window.onTickerBlur = function(i) {
+  const ticker = rows[i].ticker;
+  if (!ticker) return;
+  clearTimeout(fetchTimer[i]);
+  fetchTimer[i] = setTimeout(() => fetchPrice(ticker, i), 300);
+};
+
+/* ══════════════════ 버전 표시 ══════════════════ */
+(async function loadVersion() {
+  const el = $('version-tag');
+  if (!el) return;
+  try {
+    const res  = await fetch(`https://api.github.com/repos/${GH_REPO}/commits?per_page=1`);
+    const data = await res.json();
+    if (!Array.isArray(data) || !data[0]?.commit) { el.textContent = '📦 버전 정보 없음'; return; }
+
+    const msg  = (data[0].commit.message || '').split('\n')[0].trim();
+    const when = new Date(data[0].commit.committer.date);
+    const timeStr = when.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const diffMin = Math.max(0, Math.round((Date.now() - when.getTime()) / 60000));
+    const rel = diffMin < 1    ? '방금'
+              : diffMin < 60   ? diffMin + '분 전'
+              : diffMin < 1440 ? Math.round(diffMin / 60) + '시간 전'
+              : Math.round(diffMin / 1440) + '일 전';
+    el.textContent = `📦 ${(msg || '(제목 없음)').replace(/^Update\b/, 'Ver.')} · ${timeStr} (${rel})`;
+  } catch (e) {
+    el.textContent = '📦 버전 확인 실패';
   }
-
-  window.refreshAllPrices = async function() {
-    // 이전 가격 저장 (주가 변동분 계산용)
-    const oldPrices = rows.map(r => parseFloat(r.price) || 0);
-
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i].ticker) await fetchPrice(rows[i].ticker, i);
-    }
-
-    // 가격이 모두 들어온 뒤: 미정산 수량 변경(새 종목 추가/수량 수정)을 현금에 일괄 정산
-    // → 모바일에서 onchange가 누락돼도 '가격 갱신' 한 번으로 현금이 정확히 맞춰짐
-    settleSharesCash();
-
-    // 가격 갱신 시: 자동 모드인 Account 2,3은 기존 Total Value에 '주가 변동분'만 반영
-    // (수기 기준값을 유지하면서, 보유주식의 가격 변동만큼만 조정 → 현금칸 안 채워도 정확)
-    ['2','3'].forEach(acct => {
-      const autoEl = document.getElementById('auto' + acct);
-      if (!autoEl || !autoEl.checked) return;
-      let delta = 0;
-      rows.forEach((r, i) => {
-        const held = parseFloat(r['shares' + acct]);
-        const newP = parseFloat(r.price) || 0;
-        const oldP = oldPrices[i];
-        if (!isNaN(held) && oldP > 0 && newP > 0) {
-          delta += held * (newP - oldP);
-        }
-      });
-      const budgetEl = document.getElementById('acct' + acct + '-budget');
-      const cur = parseFloat(budgetEl.value) || 0;
-      if (cur > 0 && Math.abs(delta) > 0.005) {
-        budgetEl.value = (cur + delta).toFixed(2);
-      }
-    });
-    lastRefreshTime = Date.now();   // 마지막 갱신 시각 기록 (자동 갱신 판단용)
-    recalc();
-    saveData();
-  };
-
-  window.onTickerBlur = function(i) {
-    const ticker = rows[i].ticker;
-    if (ticker) {
-      clearTimeout(fetchTimer[i]);
-      fetchTimer[i] = setTimeout(() => fetchPrice(ticker, i), 300);
-    }
-  };
-
-  window.sortAlpha = function() {
-    rows.sort((a, b) => {
-      if (!a.ticker && !b.ticker) return 0;
-      if (!a.ticker) return 1;
-      if (!b.ticker) return -1;
-      return a.ticker.localeCompare(b.ticker);
-    });
-    renderRows();
-    saveData();
-  };
-
-  window.deleteRow = async function(i) {
-    if (rows.length <= 1) return;
-    // 자동 현금 반영이 켜져 있으면, 행 삭제 = 전량 매도로 간주 → 보유수량 × 가격만큼 현금 환원
-    const toggle = document.getElementById('auto-cash-toggle');
-    if (toggle && toggle.checked) {
-      const qty = parseFloat(rows[i].shares1) || 0;
-      if (qty > 0) {
-        let price = parseFloat(rows[i].price) || 0;
-        if (price <= 0 && rows[i].ticker) {
-          await fetchPrice(rows[i].ticker, i);   // 가격 없으면 먼저 조회
-          price = parseFloat(rows[i].price) || 0;
-        }
-        if (price > 0) {
-          const cashEl  = document.getElementById('cash1');
-          const curCash = parseFloat(cashEl.value) || 0;
-          cashEl.value  = (curCash + qty * price).toFixed(2);
-        }
-      }
-    }
-    rows.splice(i, 1);
-    renderRows();
-    saveData();
-  };
-
-  window.addRow = function() {
-    rows.unshift({ ticker: '', price: '', shares1: '', shares2: '', shares3: '' });
-    renderRows();
-    saveData();
-  };
+})();
 </script>
 </body>
 </html>
